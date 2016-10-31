@@ -19,9 +19,7 @@
     "cors": "^2.8.1",
     "express": "^4.14.0",
     "lodash": "^4.16.4",
-    "throng": "^4.0.0"
-  },
-  "devDependencies": {
+    "throng": "^4.0.0",
     "errorhandler": "^1.4.3",
     "morgan": "^1.7.0"
   }
