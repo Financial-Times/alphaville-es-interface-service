@@ -1,0 +1,28 @@
+{
+  "name": "alphaville-es-interface-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "service for alphaville-es-interface",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "^6"
+  },
+  "author": "Dragos Digulescu <dragos.digulescu@ft.com> (https://github.com/ddigulescu)",
+  "license": "ISC",
+  "dependencies": {
+    "alphaville-es-interface": "github:financial-times/alphaville-es-interface#0.8.19",
+    "alphaville-marketslive-wordpress-api": "github:financial-times/alphaville-marketslive-wordpress-api#0.4.0",
+    "alphaville-team-members": "github:financial-times/alphaville-team-members#0.3.0",
+    "cors": "^2.8.1",
+    "express": "^4.14.0",
+    "lodash": "^4.16.4",
+    "throng": "^4.0.0"
+  },
+  "devDependencies": {
+    "errorhandler": "^1.4.3",
+    "morgan": "^1.7.0"
+  }
+}
