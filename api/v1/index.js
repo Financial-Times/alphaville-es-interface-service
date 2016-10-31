@@ -3,8 +3,6 @@ const es = require('alphaville-es-interface');
 const vanityRegex = /^\/article(\/[0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/.*)$/;
 const uuidRegex = /^\/article\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 
-console.log('loading');
-
 router.get('/articles', (req, res) => {
 	let offset = req.query.offset || 0;
 	let limit = req.query.limit || 30;
