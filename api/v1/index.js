@@ -3,6 +3,8 @@ const router = require('express').Router();
 const es = require('alphaville-es-interface');
 const vanityRegex = /^\/article(\/[0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/.*)$/;
 const uuidRegex = /^\/article\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
+const mlVanityRegex = /(\/marketslive\/[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
+const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 
 const getEsQueryForArticles = (req) => {
 	let offset = parseInt(req.query.offset, 10) || 0;
@@ -40,8 +42,7 @@ router.get('/articles', (req, res, next) => {
 		.catch(next);
 });
 
-//article
-router.get(vanityRegex,  (req, res, next) => {
+const handleVanityArticle = (req, res, next) => {
 	let urlToSearch = req.params[0];
 	if (urlToSearch[0] === '/') {
 		urlToSearch = urlToSearch.substr(1, urlToSearch.length);
@@ -55,13 +56,17 @@ router.get(vanityRegex,  (req, res, next) => {
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => res.json(article))
 		.catch(next);
-});
+};
 
-router.get(uuidRegex, (req, res, next) => {
+const handleUuidArticle = (req, res, next) => {
 	return es.getArticleByUuid(req.params[0])
 		.then(article => res.json(article))
 		.catch(next)
-});
+};
+
+//article
+router.get(vanityRegex, handleVanityArticle);
+router.get(uuidRegex, handleUuidArticle);
 
 //author
 router.get('/author', (req, res, next) => {
@@ -114,5 +119,8 @@ router.get('/marketslive', (req, res, next) => {
 		.then(articles => res.json(articles))
 		.catch(next);
 });
+
+router.get(mlVanityRegex, handleVanityArticle);
+router.get(mlUuidRegex, handleUuidArticle);
 
 module.exports = router;
