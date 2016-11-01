@@ -35,7 +35,7 @@ exports.getHealth = function () {
 			})
 			.catch((err) => {
 				currentHealth.ok = false;
-				currentHealth.checkOutput = "Wordpress API is unreachable or the required page is not available. Error: " + (err && err.message ? err.message : '');
+				currentHealth.checkOutput = "Wordpress API is unreachable. Error: " + (err && err.message ? err.message : '');
 				resolve(currentHealth);
 			});
 	});
