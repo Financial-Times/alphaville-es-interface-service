@@ -82,4 +82,37 @@ router.get('/author', (req, res, next) => {
 		.catch(next);
 });
 
+//marketslive
+router.get('/marketslive', (req, res, next) => {
+	const mlQuery = {
+		filter: {
+			and: {
+				filters: [
+					{
+						term: {
+							"metadata.primary": {
+								value: "section"
+							},
+							"metadata.idV1": {
+								value: "NzE=-U2VjdGlvbnM=" // Markets
+							}
+						}
+					},
+					{
+						regexp: {
+							webUrl: {
+								value: "(.*)marketslive(.*)"
+							}
+						}
+					}
+				]
+			}
+		}
+	};
+	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
+	es.searchArticles(esQuery)
+		.then(articles => res.json(articles))
+		.catch(next);
+});
+
 module.exports = router;
