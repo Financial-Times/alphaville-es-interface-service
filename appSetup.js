@@ -1,6 +1,9 @@
 const cors = require('cors');
 const morgan = require('morgan');
+const path = require('path');
 const devErrorHandler = require('errorhandler');
+const ftwebservice = require('express-ftwebservice');
+const healthcheck = require('./health/healthchecks');
 
 const errorHandler = (err, req, res, next) => {
 	res.status(500).send('<p>Internal Server Error</p>');
@@ -16,4 +19,51 @@ module.exports = (app, config) => {
 	} else {
 		app.use(errorHandler);
 	}
+
+	ftwebservice(app, {
+		manifestPath: path.join(__dirname, 'package.json'),
+		about: {
+			"schemaVersion": 1,
+			"name": "ftalphaville-es-interface-service",
+			"purpose": "Serving article data from Next Elastic and Alphaville Wordpress with Alphaville specific transformations.",
+			"audience": "public",
+			"primaryUrl": "https://ftalphaville-es-interface-service.ft.com",
+			"serviceTier": "gold"
+		},
+		goodToGoTest: function() {
+			return new Promise(function(resolve) {
+				healthcheck.getChecks().then(checks => {
+					let ok = true;
+					checks.forEach(check => {
+						if (check.ok !== true) {
+							ok = false;
+						}
+					});
+
+					resolve(ok);
+				}).catch(() => {
+					resolve(false);
+				});
+			});
+		},
+		healthCheck: function() {
+			return healthcheck.getChecks().then(checks => {
+				return checks;
+			}).catch((err) => {
+				console.log(err);
+				return [
+					{
+						name: "Healthcheck",
+						ok: false,
+						severity: 2,
+						businessImpact: "Some areas of the application might be unavailable due to the issue.",
+						technicalSummary: "Healthcheck is not available.",
+						panicGuide: "Check the logs of the application, try to restart it from heroku.",
+						checkOutput: "Healthcheck generation failed.",
+						lastUpdated: new Date().toISOString()
+					}
+				];
+			});
+		}
+	});
 };
