@@ -11,7 +11,7 @@ const healthCheckModel = {
 	severity: 3,
 	businessImpact: "Whitelisting for AV team members will not be available.",
 	checkOutput: "",
-	panicGuide: "",
+	panicGuide: "https://sites.google.com/a/ft.com/technology/systems/content/alphaville2/00-troubleshooting",
 	lastUpdated: new Date().toISOString()
 };
 

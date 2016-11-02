@@ -11,7 +11,7 @@ const healthCheckModel = {
 	severity: 2,
 	businessImpact: "Markets Live transcript pages will not have user comments rendered.",
 	checkOutput: "",
-	panicGuide: "",
+	panicGuide: `Check the healthcheck of the service (https://${process.env['CCS_URL']}/__health)`,
 	lastUpdated: new Date().toISOString()
 };
 

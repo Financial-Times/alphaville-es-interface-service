@@ -11,7 +11,7 @@ const healthCheckModel = {
 	severity: 2,
 	businessImpact: "Markets Live will have unstyled content or just the excerpt.",
 	checkOutput: "",
-	panicGuide: "",
+	panicGuide: "https://sites.google.com/a/ft.com/technology/systems/content/alphaville2/00-troubleshooting",
 	lastUpdated: new Date().toISOString()
 };
 
