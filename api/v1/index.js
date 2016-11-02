@@ -1,8 +1,8 @@
 const _ = require('lodash');
 const router = require('express').Router();
 const es = require('alphaville-es-interface');
-const vanityRegex = /^\/article(\/[0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/.*)$/;
-const uuidRegex = /^\/article\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
+const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/.*)$/;
+const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 const mlVanityRegex = /(\/marketslive\/[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
 const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 
@@ -43,16 +43,7 @@ router.get('/articles', (req, res, next) => {
 });
 
 const handleVanityArticle = (req, res, next) => {
-	let urlToSearch = req.params[0];
-	if (urlToSearch[0] === '/') {
-		urlToSearch = urlToSearch.substr(1, urlToSearch.length);
-	}
-	if (urlToSearch[urlToSearch.length - 1] === '/') {
-		urlToSearch = urlToSearch.substr(0, urlToSearch.length - 1);
-	}
-
-	urlToSearch = `*://ftalphaville.ft.com/${urlToSearch}/`;
-
+	let urlToSearch = `*://ftalphaville.ft.com/${req.params[0]}`;
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => res.json(article))
 		.catch(next);
