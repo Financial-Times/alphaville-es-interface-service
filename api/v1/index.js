@@ -1,14 +1,16 @@
 const _ = require('lodash');
-const router = require('express').Router();
+const router = new (require('express')).Router();
 const es = require('alphaville-es-interface');
+const suds = require('../../services/suds');
+
 const vanityRegex = /^\/article(\/[0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/.*)$/;
 const uuidRegex = /^\/article\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 const mlVanityRegex = /(\/marketslive\/[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
 const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 
 const getEsQueryForArticles = (req) => {
-	let offset = parseInt(req.query.offset, 10) || 0;
-	let limit = parseInt(req.query.limit, 10) || 30;
+	const offset = parseInt(req.query.offset, 10) || 0;
+	const limit = parseInt(req.query.limit, 10) || 30;
 	return {
 		sort: {
 			publishedDate: {
@@ -26,7 +28,7 @@ router.get('/articles', (req, res, next) => {
 	let esQuery = getEsQueryForArticles(req);
 
 	if (searchString) {
-		let searchQuery = {
+		const searchQuery = {
 			query: {
 				multi_match: {
 					query: searchString,
@@ -34,7 +36,7 @@ router.get('/articles', (req, res, next) => {
 				}
 			}
 		};
-		esQuery =  _.merge(esQuery, searchQuery);
+		esQuery = _.merge(esQuery, searchQuery);
 	}
 
 	es.searchArticles(esQuery)
@@ -61,7 +63,7 @@ const handleVanityArticle = (req, res, next) => {
 const handleUuidArticle = (req, res, next) => {
 	return es.getArticleByUuid(req.params[0])
 		.then(article => res.json(article))
-		.catch(next)
+		.catch(next);
 };
 
 //article
@@ -73,7 +75,7 @@ router.get('/author', (req, res, next) => {
 	const authorString = req.query.q || null;
 	let esQuery = getEsQueryForArticles(req);
 	if (authorString) {
-		let authorQuery = {
+		const authorQuery = {
 			query: {
 				wildcard : {
 					byline: `*${authorString}*`
@@ -122,5 +124,36 @@ router.get('/marketslive', (req, res, next) => {
 
 router.get(mlVanityRegex, handleVanityArticle);
 router.get(mlUuidRegex, handleUuidArticle);
+
+router.get('/hotarticles', (req, res, next) => {
+	let limit = 10;
+	if (req.query.limit) {
+		limit = parseInt(req.query.limit);
+
+		if (limit > 90) {
+			limit = 90;
+		}
+	}
+
+	suds.getHotArticles({
+		tag: 'alphaville',
+		count: limit + 10
+	}).then(results => {
+		if (process.env.NODE_ENV === 'production') {
+			res.set('Cache-Control', 'public, max-age=300');
+		}
+
+		const articles = [];
+		results.forEach((article) => {
+			if (articles.length < limit) {
+				if (article.url.indexOf('marketslive') === -1) {
+					articles.push(article);
+				}
+			}
+		});
+
+		res.json(articles);
+	}).catch(next);
+});
 
 module.exports = router;
