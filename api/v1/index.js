@@ -132,6 +132,8 @@ router.get('/hotarticles', (req, res, next) => {
 	}).then(results => {
 		if (process.env.NODE_ENV === 'production') {
 			res.set('Cache-Control', 'public, max-age=300');
+		} else {
+			res.set('Cache-Control', 'private, no-cache, no-store');
 		}
 
 		const articles = [];
