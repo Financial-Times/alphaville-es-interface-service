@@ -8,9 +8,9 @@ const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}
 const mlVanityRegex = /(^\/marketslive\/+[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
 const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 
-const articleCache = 60;
+const articleCache = 300;
 const mlCache = 3600;
-const searchStreamCache = 0;
+const searchStreamCache = 60;
 const authorStreamCache = 60;
 const mlStreamCache = 0;
 const hotStreamCache = 60;
