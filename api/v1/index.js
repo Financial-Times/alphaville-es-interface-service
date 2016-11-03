@@ -5,8 +5,12 @@ const suds = require('../../services/suds');
 
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
-const mlVanityRegex = /(\/marketslive\/[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
+const mlVanityRegex = /(^\/marketslive\/+[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
 const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
+
+const sanitizeParam = (param) => {
+	return param.replace(/^\/+|\/+$/g, '');
+};
 
 const getEsQueryForArticles = (req) => {
 	const offset = parseInt(req.query.offset, 10) || 0;
@@ -45,7 +49,7 @@ router.get('/articles', (req, res, next) => {
 });
 
 const handleVanityArticle = (req, res, next) => {
-	let urlToSearch = `*://ftalphaville.ft.com/${req.params[0]}/`;
+	let urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(req.params[0])}/`;
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => res.json(article))
 		.catch(next);
