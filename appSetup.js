@@ -6,6 +6,8 @@ const ftwebservice = require('express-ftwebservice');
 const healthcheck = require('./health/healthchecks');
 
 const errorHandler = (err, req, res, next) => {
+	res.set('Cache-Control', 'private, no-cache, no-store');
+
 	res.status(500).send('<p>Internal Server Error</p>');
 	console.error(err.stack);
 	next(err);

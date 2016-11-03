@@ -8,6 +8,13 @@ const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}
 const mlVanityRegex = /(^\/marketslive\/+[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
 const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 
+const articleCache = 60;
+const mlCache = 3600;
+const searchStreamCache = 0;
+const authorStreamCache = 60;
+const mlStreamCache = 0;
+const hotStreamCache = 60;
+
 const sanitizeParam = (param) => {
 	return param.replace(/^\/+|\/+$/g, '');
 };
@@ -44,20 +51,68 @@ router.get('/articles', (req, res, next) => {
 	}
 
 	es.searchArticles(esQuery)
-		.then(articles => res.json(articles))
+		.then(articles => {
+			if (process.env.NODE_ENV === 'production' && searchStreamCache > 0) {
+				res.set('Cache-Control', 'public, max-age=' + searchStreamCache);
+			} else {
+				res.set('Cache-Control', 'private, no-cache, no-store');
+			}
+
+			res.json(articles);
+		})
 		.catch(next);
 });
 
 const handleVanityArticle = (req, res, next) => {
-	let urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(req.params[0])}/`;
+	const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(req.params[0])}/`;
 	return es.getArticleByUrl(urlToSearch)
-		.then(article => res.json(article))
+		.then(article => {
+			if (article.isMarketsLive) {
+				if (article.isLive || new Date().getTime() - new Date(article.publishedDate).getTime() < 6 * 60 * 60 * 1000) {
+					res.set('Cache-Control', 'private, no-cache, no-store');
+				} else {
+					if (process.env.NODE_ENV === 'production' && mlCache > 0) {
+						res.set('Cache-Control', 'public, max-age=' + mlCache);
+					} else {
+						res.set('Cache-Control', 'private, no-cache, no-store');
+					}
+				}
+			} else {
+				if (process.env.NODE_ENV === 'production' && articleCache > 0) {
+					res.set('Cache-Control', 'public, max-age=' + articleCache);
+				} else {
+					res.set('Cache-Control', 'private, no-cache, no-store');
+				}
+			}
+
+			res.json(article);
+		})
 		.catch(next);
 };
 
 const handleUuidArticle = (req, res, next) => {
 	return es.getArticleByUuid(req.params[0])
-		.then(article => res.json(article))
+		.then(article => {
+			if (article.isMarketsLive) {
+				if (article.isLive || new Date().getTime() - new Date(article.publishedDate).getTime() < 6 * 60 * 60 * 1000) {
+					res.set('Cache-Control', 'private, no-cache, no-store');
+				} else {
+					if (process.env.NODE_ENV === 'production' && mlCache > 0) {
+						res.set('Cache-Control', 'public, max-age=' + mlCache);
+					} else {
+						res.set('Cache-Control', 'private, no-cache, no-store');
+					}
+				}
+			} else {
+				if (process.env.NODE_ENV === 'production' && articleCache > 0) {
+					res.set('Cache-Control', 'public, max-age=' + articleCache);
+				} else {
+					res.set('Cache-Control', 'private, no-cache, no-store');
+				}
+			}
+
+			res.json(article);
+		})
 		.catch(next);
 };
 
@@ -80,7 +135,15 @@ router.get('/author', (req, res, next) => {
 		esQuery = _.merge(esQuery, authorQuery);
 	}
 	es.searchArticles(esQuery)
-		.then(articles => res.json(articles))
+		.then(articles => {
+			if (process.env.NODE_ENV === 'production' && authorStreamCache > 0) {
+				res.set('Cache-Control', 'public, max-age=' + authorStreamCache);
+			} else {
+				res.set('Cache-Control', 'private, no-cache, no-store');
+			}
+
+			res.json(articles);
+		})
 		.catch(next);
 });
 
@@ -113,7 +176,22 @@ router.get('/marketslive', (req, res, next) => {
 	};
 	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
 	es.searchArticles(esQuery)
-		.then(articles => res.json(articles))
+		.then(articles => {
+			let isLive = false;
+			articles.forEach(article => {
+				if (article.isLive) {
+					isLive = true;
+				}
+			});
+
+			if (process.env.NODE_ENV === 'production' && mlStreamCache > 0 && !isLive) {
+				res.set('Cache-Control', 'public, max-age=' + mlStreamCache);
+			} else {
+				res.set('Cache-Control', 'private, no-cache, no-store');
+			}
+
+			res.json(articles);
+		})
 		.catch(next);
 });
 
@@ -134,8 +212,8 @@ router.get('/hotarticles', (req, res, next) => {
 		tag: 'alphaville',
 		count: limit + 10
 	}).then(results => {
-		if (process.env.NODE_ENV === 'production') {
-			res.set('Cache-Control', 'public, max-age=300');
+		if (process.env.NODE_ENV === 'production' && hotStreamCache > 0) {
+			res.set('Cache-Control', 'public, max-age=' + hotStreamCache);
 		} else {
 			res.set('Cache-Control', 'private, no-cache, no-store');
 		}
