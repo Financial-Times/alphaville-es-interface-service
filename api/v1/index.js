@@ -10,10 +10,28 @@ const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 
 const articleCache = 300;
 const mlCache = 3600;
+const indexStreamCache = 0;
 const searchStreamCache = 60;
 const authorStreamCache = 60;
 const mlStreamCache = 0;
 const hotStreamCache = 60;
+
+
+const setCache = (res, value) => {
+	if (process.env.NODE_ENV === 'production') {
+		if (value > 0) {
+			res.set('Cache-Control', 'public, max-age=' + value);
+		} else {
+			setNoCache(res);
+		}
+	} else {
+		setNoCache(res);
+	}
+};
+
+const setNoCache = (res) => {
+	res.set('Cache-Control', 'private, no-cache, no-store');
+};
 
 const sanitizeParam = (param) => {
 	return param.replace(/^\/+|\/+$/g, '');
@@ -52,10 +70,10 @@ router.get('/articles', (req, res, next) => {
 
 	es.searchArticles(esQuery)
 		.then(articles => {
-			if (process.env.NODE_ENV === 'production' && searchStreamCache > 0) {
-				res.set('Cache-Control', 'public, max-age=' + searchStreamCache);
+			if (!searchString) {
+				setCache(res, indexStreamCache);
 			} else {
-				res.set('Cache-Control', 'private, no-cache, no-store');
+				setCache(res, searchStreamCache);
 			}
 
 			res.json(articles);
@@ -69,20 +87,12 @@ const handleVanityArticle = (req, res, next) => {
 		.then(article => {
 			if (article.isMarketsLive) {
 				if (article.isLive || new Date().getTime() - new Date(article.publishedDate).getTime() < 6 * 60 * 60 * 1000) {
-					res.set('Cache-Control', 'private, no-cache, no-store');
+					setNoCache(res);
 				} else {
-					if (process.env.NODE_ENV === 'production' && mlCache > 0) {
-						res.set('Cache-Control', 'public, max-age=' + mlCache);
-					} else {
-						res.set('Cache-Control', 'private, no-cache, no-store');
-					}
+					setCache(res, mlCache);
 				}
 			} else {
-				if (process.env.NODE_ENV === 'production' && articleCache > 0) {
-					res.set('Cache-Control', 'public, max-age=' + articleCache);
-				} else {
-					res.set('Cache-Control', 'private, no-cache, no-store');
-				}
+				setCache(res, articleCache);
 			}
 
 			res.json(article);
@@ -95,20 +105,12 @@ const handleUuidArticle = (req, res, next) => {
 		.then(article => {
 			if (article.isMarketsLive) {
 				if (article.isLive || new Date().getTime() - new Date(article.publishedDate).getTime() < 6 * 60 * 60 * 1000) {
-					res.set('Cache-Control', 'private, no-cache, no-store');
+					setNoCache(res);
 				} else {
-					if (process.env.NODE_ENV === 'production' && mlCache > 0) {
-						res.set('Cache-Control', 'public, max-age=' + mlCache);
-					} else {
-						res.set('Cache-Control', 'private, no-cache, no-store');
-					}
+					setCache(res, mlCache);
 				}
 			} else {
-				if (process.env.NODE_ENV === 'production' && articleCache > 0) {
-					res.set('Cache-Control', 'public, max-age=' + articleCache);
-				} else {
-					res.set('Cache-Control', 'private, no-cache, no-store');
-				}
+				setCache(res, articleCache);
 			}
 
 			res.json(article);
@@ -136,11 +138,7 @@ router.get('/author', (req, res, next) => {
 	}
 	es.searchArticles(esQuery)
 		.then(articles => {
-			if (process.env.NODE_ENV === 'production' && authorStreamCache > 0) {
-				res.set('Cache-Control', 'public, max-age=' + authorStreamCache);
-			} else {
-				res.set('Cache-Control', 'private, no-cache, no-store');
-			}
+			setCache(res, authorStreamCache);
 
 			res.json(articles);
 		})
@@ -184,10 +182,10 @@ router.get('/marketslive', (req, res, next) => {
 				}
 			});
 
-			if (process.env.NODE_ENV === 'production' && mlStreamCache > 0 && !isLive) {
-				res.set('Cache-Control', 'public, max-age=' + mlStreamCache);
+			if (!isLive) {
+				setCache(res, mlStreamCache);
 			} else {
-				res.set('Cache-Control', 'private, no-cache, no-store');
+				setNoCache();
 			}
 
 			res.json(articles);
@@ -212,11 +210,7 @@ router.get('/hotarticles', (req, res, next) => {
 		tag: 'alphaville',
 		count: limit + 10
 	}).then(results => {
-		if (process.env.NODE_ENV === 'production' && hotStreamCache > 0) {
-			res.set('Cache-Control', 'public, max-age=' + hotStreamCache);
-		} else {
-			res.set('Cache-Control', 'private, no-cache, no-store');
-		}
+		setCache(res, hotStreamCache);
 
 		const articles = [];
 		results.forEach(article => {
