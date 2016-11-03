@@ -137,7 +137,7 @@ router.get('/hotarticles', (req, res, next) => {
 		}
 
 		const articles = [];
-		results.forEach((article) => {
+		results.forEach(article => {
 			if (articles.length < limit) {
 				if (article.url.indexOf('marketslive') === -1) {
 					articles.push(article);
@@ -145,7 +145,28 @@ router.get('/hotarticles', (req, res, next) => {
 			}
 		});
 
-		res.json(articles);
+		const articleIds = [];
+		articles.forEach(article => {
+			articleIds.push(article.articleId);
+		});
+
+		es.searchArticles({
+			query: {
+				ids: {
+					values: articleIds
+				}
+			}
+		}).then(articles => {
+			if (articles && articles.hits && articles.hits.hits) {
+				res.json(articles);
+			} else {
+				res.json({
+					hits: {
+						hits: []
+					}
+				});
+			}
+		}).catch(next);
 	}).catch(next);
 });
 
