@@ -58,3 +58,16 @@ module.exports = (app, config) => {
 		}
 	});
 };
+
+
+
+
+// force GC to 80% of available memory
+const v8 = require('v8');
+
+module.exports = () => {
+	if(process.env.WEB_MEMORY) {
+		const gcMemory = Math.floor(parseInt(process.env.WEB_MEMORY, 10) * 4 / 5);
+		v8.setFlagsFromString(`--max_old_space_size=${gcMemory}`);
+	}
+};
