@@ -43,7 +43,7 @@ const startServer = (serverConfig) => {
 	const config = _.merge(defaultConfig, serverConfig);
 	const server = createServer(config);
 	server.listen(config.port, () => {
-		console.log('Server #%s listening on port %s', config.id, config.port)
+		console.log('Server #%s listening on port %s', config.id, config.port);
 	});
 	return server;
 };
