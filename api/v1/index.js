@@ -14,7 +14,7 @@ const indexStreamCache = 60;
 const searchStreamCache = 60;
 const authorStreamCache = 60;
 const mlStreamCache = 60;
-const hotStreamCache = 60;
+const hotStreamCache = 600;
 
 
 const setCache = (res, value) => {
@@ -233,14 +233,29 @@ router.get('/hotarticles', (req, res, next) => {
 			articleIds.push(article.articleId);
 		});
 
+
 		es.searchArticles({
 			query: {
 				ids: {
 					values: articleIds
 				}
-			}
+			},
+			size: limit
 		}).then(articles => {
 			if (articles && articles.hits && articles.hits.hits) {
+				const sortedResult = [];
+				articles.hits.hits.forEach((article) => {
+					if (articleIds.indexOf(article._id) >= 0) {
+						sortedResult[articleIds.indexOf(article._id)] = article;
+					}
+				});
+
+				const cleanResult = [];
+				sortedResult.forEach((article) => {
+					cleanResult.push(article);
+				});
+				articles.hits.hits = cleanResult;
+
 				res.json(articles);
 			} else {
 				res.json({
