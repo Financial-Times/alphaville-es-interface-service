@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const router = new (require('express')).Router();
+const router = require('express').Router();
 const es = require('alphaville-es-interface');
 const suds = require('../../services/suds');
 
@@ -50,6 +50,13 @@ const getEsQueryForArticles = (req) => {
 		size: limit
 	};
 };
+
+router.use((req, res, next) => {
+	if (process.env['API_KEY'] === req.get('X-API-KEY')) {
+		return next();
+	}
+	res.sendStatus(401);
+});
 
 //articles
 router.get('/articles', (req, res, next) => {

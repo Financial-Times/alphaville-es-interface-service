@@ -38,6 +38,7 @@ const startServer = (serverConfig) => {
 	server.listen(config.port, () => {
 		console.log('Server #%s listening on port %s', config.id, config.port)
 	});
+	return server;
 };
 
 module.exports = {
