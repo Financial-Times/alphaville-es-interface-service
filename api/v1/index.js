@@ -197,7 +197,7 @@ router.get(mlVanityRegex, handleVanityArticle);
 router.get(mlUuidRegex, handleUuidArticle);
 
 router.get('/hotarticles', (req, res, next) => {
-	let limit = 10;
+	let limit = 30;
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit);
 
@@ -208,7 +208,7 @@ router.get('/hotarticles', (req, res, next) => {
 
 	suds.getHotArticles({
 		tag: 'alphaville',
-		count: limit + 10
+		number: limit + 10
 	}).then(results => {
 		setCache(res, hotStreamCache);
 
