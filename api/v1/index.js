@@ -10,10 +10,10 @@ const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 
 const articleCache = 300;
 const mlCache = 3600;
-const indexStreamCache = 0;
+const indexStreamCache = 60;
 const searchStreamCache = 60;
 const authorStreamCache = 60;
-const mlStreamCache = 0;
+const mlStreamCache = 60;
 const hotStreamCache = 60;
 
 
