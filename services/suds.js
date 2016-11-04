@@ -1,6 +1,7 @@
 "use strict";
 
 const fetch = require('node-fetch');
+const qs = require('querystring');
 
 function SudsApiError(message, code, response) {
 	this.message = message;
@@ -14,24 +15,7 @@ exports.getHotArticles = function (query) {
 	const url = process.env.SUDS_API_URL + '/v1/livefyre/hottest';
 	query = query || {};
 
-	let queryString = "";
-	if (query) {
-		Object.keys(query).forEach((key) => {
-			if (typeof query[key] === 'string') {
-				queryString += `&${key}=${query[key]}`;
-			} else if (query[key] instanceof Array) {
-				query[key].forEach((value) => {
-					queryString += `&${key}=${value}`;
-				});
-			}
-		});
-	}
-
-	if (queryString) {
-		queryString = queryString.substr(1);
-	}
-
-	return fetch(`${url}?${queryString}`).then((res) => {
+	return fetch(`${url}?${qs.stringify(query)}`).then((res) => {
 		if (!res.ok) {
 			throw new SudsApiError(res.statusText, res.status, res);
 		}
