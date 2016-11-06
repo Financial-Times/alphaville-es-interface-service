@@ -206,41 +206,31 @@ router.get(mlUuidRegex, handleUuidArticle);
 router.get('/hotarticles', (req, res, next) => {
 	let limit = 30;
 	if (req.query.limit) {
-		limit = parseInt(req.query.limit);
+		limit = parseInt(req.query.limit, 10);
 
 		if (limit > 90) {
 			limit = 90;
 		}
 	}
 
-	suds.getHotArticles({
+	return suds.getHotArticles({
 		tag: 'alphaville',
 		number: limit + 10
 	}).then(results => {
 		setCache(res, hotStreamCache);
 
-		const articles = [];
-		results.forEach(article => {
-			if (articles.length < limit) {
-				if (article.url.indexOf('marketslive') === -1) {
-					articles.push(article);
-				}
-			}
-		});
+		const articles = results
+			.filter(a => a.url.indexOf('marketslive') === -1)
+			.slice(0, limit);
 
-		const articleIds = [];
-		articles.forEach(article => {
-			articleIds.push(article.articleId);
-		});
+		const articleIds = articles.map(a => a.articleId);
 
-
-		es.searchArticles({
+		return es.searchArticles({
 			query: {
 				ids: {
 					values: articleIds
 				}
-			},
-			size: limit
+			}
 		}).then(articles => {
 			if (articles && articles.hits && articles.hits.hits) {
 				const sortedResult = [];
@@ -250,11 +240,7 @@ router.get('/hotarticles', (req, res, next) => {
 					}
 				});
 
-				const cleanResult = [];
-				sortedResult.forEach((article) => {
-					cleanResult.push(article);
-				});
-				articles.hits.hits = cleanResult;
+				articles.hits.hits = sortedResult;
 
 				res.json(articles);
 			} else {
@@ -264,7 +250,7 @@ router.get('/hotarticles', (req, res, next) => {
 					}
 				});
 			}
-		}).catch(next);
+		})
 	}).catch(next);
 });
 
