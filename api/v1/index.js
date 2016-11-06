@@ -2,6 +2,7 @@ const _ = require('lodash');
 const router = require('express').Router();
 const es = require('alphaville-es-interface');
 const suds = require('../../services/suds');
+const fastly = require('../../services/fastly');
 
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
@@ -252,6 +253,16 @@ router.get('/hotarticles', (req, res, next) => {
 			}
 		})
 	}).catch(next);
+});
+
+router.post('/purge', (req, res, next) => {
+	const url = req.body.url;
+	if (url) {
+		return fastly.purge(url).then(obj => {
+			res.json(obj);
+		}).catch(next);
+	}
+	return next('No path to purge provided');
 });
 
 module.exports = router;
