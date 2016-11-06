@@ -5,7 +5,7 @@
   "description": "service for alphaville-es-interface",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
     "test": "NODE_ENV=testing mocha ./test/routes.test.js"
   },
   "engines": {
