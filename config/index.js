@@ -5,7 +5,9 @@ const config = {
 	prod: 'production',
 	port: parseInt(process.env.PORT, 10) || 5000,
 	timeout: parseInt(process.env.TIMEOUT, 10) || 20000,
-	id: 1
+	id: 1,
+	fastlyKey: process.env['FASTLY_KEY'],
+	serviceUrl: process.env['SERVICE_URL']
 };
 
 process.env.NODE_ENV = process.env.NODE_ENV || config.dev;

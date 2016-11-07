@@ -2,6 +2,7 @@ const _ = require('lodash');
 const router = require('express').Router();
 const es = require('alphaville-es-interface');
 const suds = require('../../services/suds');
+const fastly = require('../../services/fastly');
 
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
@@ -214,41 +215,31 @@ router.get(mlUuidRegex, handleUuidArticle);
 router.get('/hotarticles', (req, res, next) => {
 	let limit = 30;
 	if (req.query.limit) {
-		limit = parseInt(req.query.limit);
+		limit = parseInt(req.query.limit, 10);
 
 		if (limit > 90) {
 			limit = 90;
 		}
 	}
 
-	suds.getHotArticles({
+	return suds.getHotArticles({
 		tag: 'alphaville',
 		number: limit + 10
 	}).then(results => {
 		setCache(res, hotStreamCache);
 
-		const articles = [];
-		results.forEach(article => {
-			if (articles.length < limit) {
-				if (article.url.indexOf('marketslive') === -1) {
-					articles.push(article);
-				}
-			}
-		});
+		const articles = results
+			.filter(a => a.url.indexOf('marketslive') === -1)
+			.slice(0, limit);
 
-		const articleIds = [];
-		articles.forEach(article => {
-			articleIds.push(article.articleId);
-		});
+		const articleIds = articles.map(a => a.articleId);
 
-
-		es.searchArticles({
+		return es.searchArticles({
 			query: {
 				ids: {
 					values: articleIds
 				}
-			},
-			size: limit
+			}
 		}).then(articles => {
 			if (articles && articles.hits && articles.hits.hits) {
 				const sortedResult = [];
@@ -258,11 +249,7 @@ router.get('/hotarticles', (req, res, next) => {
 					}
 				});
 
-				const cleanResult = [];
-				sortedResult.forEach((article) => {
-					cleanResult.push(article);
-				});
-				articles.hits.hits = cleanResult;
+				articles.hits.hits = sortedResult;
 
 				res.json(articles);
 			} else {
@@ -272,8 +259,18 @@ router.get('/hotarticles', (req, res, next) => {
 					}
 				});
 			}
-		}).catch(next);
+		})
 	}).catch(next);
+});
+
+router.post('/purge', (req, res, next) => {
+	const url = req.body.url;
+	if (url) {
+		return fastly.purge(url).then(obj => {
+			res.json(obj);
+		}).catch(next);
+	}
+	return next('No path to purge provided');
 });
 
 module.exports = router;
