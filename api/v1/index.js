@@ -223,7 +223,11 @@ router.get('/hotarticles', (req, res, next) => {
 	}
 
 	return suds.getHotArticles({
-		tag: 'alphaville',
+		tag: [
+			'brand.FT_Alphaville',
+			'brand.First_FT'
+		],
+		op: 'or',
 		number: limit + 10
 	}).then(results => {
 		setCache(res, hotStreamCache);
