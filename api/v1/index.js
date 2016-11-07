@@ -229,8 +229,7 @@ router.get('/hotarticles', (req, res, next) => {
 		setCache(res, hotStreamCache);
 
 		const articles = results
-			.filter(a => a.url.indexOf('marketslive') === -1)
-			.slice(0, limit);
+			.filter(a => a.url.indexOf('marketslive') === -1);
 
 		const articleIds = articles.map(a => a.articleId);
 
@@ -239,7 +238,8 @@ router.get('/hotarticles', (req, res, next) => {
 				ids: {
 					values: articleIds
 				}
-			}
+			},
+			size: limit
 		}).then(articles => {
 			if (articles && articles.hits && articles.hits.hits) {
 				const sortedResult = [];
