@@ -182,20 +182,28 @@ router.get('/marketslive', (req, res, next) => {
 	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
 	es.searchArticles(esQuery)
 		.then(articles => {
-			let isLive = false;
-			articles.forEach(article => {
-				if (article.isLive) {
-					isLive = true;
+			if (articles && articles.hits && articles.hits.hits) {
+				let isLive = false;
+				articles.hits.hits.forEach(article => {
+					if (article.isLive) {
+						isLive = true;
+					}
+				});
+
+				if (!isLive) {
+					setCache(res, mlStreamCache);
+				} else {
+					setNoCache(res);
 				}
-			});
 
-			if (!isLive) {
-				setCache(res, mlStreamCache);
+				res.json(articles);
 			} else {
-				setNoCache();
+				res.json({
+					hits: {
+						hits: []
+					}
+				});
 			}
-
-			res.json(articles);
 		})
 		.catch(next);
 });
