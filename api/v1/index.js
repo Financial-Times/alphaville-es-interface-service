@@ -249,7 +249,7 @@ router.get('/hotarticles', (req, res, next) => {
 					}
 				});
 
-				articles.hits.hits = sortedResult;
+				articles.hits.hits = sortedResult.filter(a => a !== null);
 
 				res.json(articles);
 			} else {
@@ -259,7 +259,7 @@ router.get('/hotarticles', (req, res, next) => {
 					}
 				});
 			}
-		})
+		});
 	}).catch(next);
 });
 
