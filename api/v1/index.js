@@ -114,9 +114,9 @@ const handleUuidArticle = (req, res, next) => {
 		.then(article => {
 			if (article.isMarketsLive) {
 				if (article.isLive || new Date().getTime() - new Date(article.publishedDate).getTime() < 6 * 60 * 60 * 1000) {
-					setNoCache(res);
+					setCache(res, mlCacheShort);
 				} else {
-					setCache(res, mlCache);
+					setCache(res, mlCacheLong);
 				}
 			} else {
 				setCache(res, articleCache);
