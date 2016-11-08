@@ -6,6 +6,7 @@ const config = {
 	port: parseInt(process.env.PORT, 10) || 5000,
 	timeout: parseInt(process.env.TIMEOUT, 10) || 20000,
 	id: 1,
+	apiVersion: 'v1',
 	fastlyKey: process.env['FASTLY_KEY'],
 	serviceUrl: process.env['SERVICE_URL']
 };
