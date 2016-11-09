@@ -8,7 +8,7 @@ const config = {
 	id: 1,
 	apiVersion: 'v1',
 	fastlyKey: process.env['FASTLY_KEY'],
-	serviceUrl: process.env['SERVICE_URL']
+	serviceUrl: 'https://' + process.env['SERVICE_URL'] + '/v1'
 };
 
 process.env.NODE_ENV = process.env.NODE_ENV || config.dev;
