@@ -11,7 +11,7 @@ const healthCheckModel = {
 	severity: 1,
 	businessImpact: "Article search or article data will not be available.",
 	checkOutput: "",
-	panicGuide: `Check the healthcheck of the service (https://${process.env['ELASTIC_SEARCH_URL']}/__health)`,
+	panicGuide: `Check the healthcheck of the service (https://next-elastic.ft.com/__health)`,
 	lastUpdated: new Date().toISOString()
 };
 
