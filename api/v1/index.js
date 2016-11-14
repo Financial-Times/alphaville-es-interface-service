@@ -41,7 +41,7 @@ const sanitizeParam = (param) => {
 };
 
 const sanitizeSearchString = (str) => {
-	return _.trim(str.replace(/\s*[":><=+|\-()]+\s*/g, ''));
+	return _.trim(str.replace(/\s*[":><=+|\-()]+\s*/g, ' '));
 };
 
 const getEsQueryForArticles = (req) => {
