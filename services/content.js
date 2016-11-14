@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 
 const search = (searchStr, maxResults, offset) => {
 	const body = {
-		queryString: `brand:="FT Alphaville" AND (byline:"${searchStr}" OR title:"${searchStr}")`,
+		queryString: `(brand:="FT Alphaville" OR brand:="First FT") AND ${searchStr}`,
 			queryContext: {
 			curations: ['ARTICLES', 'BLOGS']
 		},
