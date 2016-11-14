@@ -95,10 +95,20 @@ const handleVanityArticle = (req, res, next) => {
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => {
 			if (article.isMarketsLive) {
-				if (article.isLive || new Date().getTime() - new Date(article.publishedDate).getTime() < 6 * 60 * 60 * 1000) {
-					setCache(res, mlCacheShort);
+				if (article.isLive) {
+					setNoCache(res);
 				} else {
-					setCache(res, mlCacheLong);
+					const today = new Date();
+					const publishedDate = new Date(article.publishedDate);
+
+					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
+							&& publishedDate.getUTCMonth() === today.getUTCMonth()
+							&& publishedDate.getUTCDate() === today.getUTCDate()) {
+						// on the day of publishing apply short cache
+						setCache(res, mlCacheShort);
+					} else {
+						setCache(res, mlCacheLong);
+					}
 				}
 			} else {
 				setCache(res, articleCache);
@@ -113,10 +123,20 @@ const handleUuidArticle = (req, res, next) => {
 	return es.getArticleByUuid(req.params[0])
 		.then(article => {
 			if (article.isMarketsLive) {
-				if (article.isLive || new Date().getTime() - new Date(article.publishedDate).getTime() < 6 * 60 * 60 * 1000) {
-					setCache(res, mlCacheShort);
+				if (article.isLive) {
+					setNoCache(res);
 				} else {
-					setCache(res, mlCacheLong);
+					const today = new Date();
+					const publishedDate = new Date(article.publishedDate);
+
+					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
+							&& publishedDate.getUTCMonth() === today.getUTCMonth()
+							&& publishedDate.getUTCDate() === today.getUTCDate()) {
+						// on the day of publishing apply short cache
+						setCache(res, mlCacheShort);
+					} else {
+						setCache(res, mlCacheLong);
+					}
 				}
 			} else {
 				setCache(res, articleCache);
