@@ -3,6 +3,7 @@ const router = require('express').Router();
 const es = require('alphaville-es-interface');
 const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
+const contentApi = require('../../services/content');
 
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
@@ -39,6 +40,10 @@ const sanitizeParam = (param) => {
 	return param.replace(/^\/+|\/+$/g, '');
 };
 
+const sanitizeSearchString = (str) => {
+	return _.trim(str.replace(/\s*[":><=+|\-()]+\s*/g, ''));
+};
+
 const getEsQueryForArticles = (req) => {
 	const offset = parseInt(req.query.offset, 10) || 0;
 	const limit = parseInt(req.query.limit, 10) || 30;
@@ -62,32 +67,60 @@ router.use((req, res, next) => {
 
 //articles
 router.get('/articles', (req, res, next) => {
-	const searchString = req.query.q || null;
 	let esQuery = getEsQueryForArticles(req);
+	let sanitizedSearchString = sanitizeSearchString(req.query.q) || null;
 
-	if (searchString) {
-		const searchQuery = {
-			query: {
-				multi_match: {
-					query: searchString,
-					fields: ["titles", "byline"]
-				}
-			}
-		};
-		esQuery = _.merge(esQuery, searchQuery);
-	}
-
-	es.searchArticles(esQuery)
-		.then(articles => {
-			if (!searchString) {
+	if (!sanitizedSearchString) {
+		console.log('gone here');
+		es.searchArticles(esQuery)
+			.then(articles => {
 				setCache(res, indexStreamCache);
-			} else {
-				setCache(res, searchStreamCache);
-			}
-
-			res.json(articles);
-		})
-		.catch(next);
+				res.json(articles);
+			})
+			.catch(next);
+	} else {
+		const offset = parseInt(req.query.offset, 10) || 0;
+		const limit = parseInt(req.query.limit, 10) || 30;
+		let indexCount = 0;
+		contentApi.search(sanitizedSearchString, limit, offset)
+			.then(articles => {
+				if (parseInt(articles.results[0].indexCount, 10)) {
+					indexCount = articles.results[0].indexCount;
+					return articles.results[0].results.map(a => a.id);
+	 			}
+			})
+			.then(articlesIds => {
+				if (articlesIds) {
+					esQuery = {
+						query: {
+							ids: {
+								values: articlesIds
+							}
+						},
+						sort: {
+							publishedDate: {
+								order: 'desc'
+							}
+						}
+					};
+					return es.searchArticles(esQuery);
+				}
+			})
+			.then(articles => {
+				if (articles) {
+					setCache(res, searchStreamCache);
+					articles.hits.total = indexCount;
+					res.json(articles);
+				} else {
+					res.json({
+						hits: {
+							hits: []
+						}
+					})
+				}
+			})
+			.catch(console.log);
+	}
 });
 
 const handleVanityArticle = (req, res, next) => {
