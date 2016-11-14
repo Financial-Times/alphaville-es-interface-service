@@ -68,10 +68,14 @@ router.use((req, res, next) => {
 //articles
 router.get('/articles', (req, res, next) => {
 	let esQuery = getEsQueryForArticles(req);
-	let sanitizedSearchString = sanitizeSearchString(req.query.q) || null;
+	let searchString = req.query.q || null;
+	let sanitizedSearchString = null;
+
+	if (searchString) {
+		sanitizedSearchString = sanitizeSearchString(searchString);
+	}
 
 	if (!sanitizedSearchString) {
-		console.log('gone here');
 		es.searchArticles(esQuery)
 			.then(articles => {
 				setCache(res, indexStreamCache);
