@@ -99,7 +99,7 @@ const handleVanityArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article.publishedDate);
+					const publishedDate = new Date(article._source.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -127,7 +127,7 @@ const handleUuidArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article.publishedDate);
+					const publishedDate = new Date(article._source.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
