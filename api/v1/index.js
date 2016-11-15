@@ -65,6 +65,27 @@ router.use((req, res, next) => {
 	res.sendStatus(401);
 });
 
+router.get('/series/:id', (req, res, next) => {
+	const seriesId = req.params.id;
+	let esQuery = getEsQueryForArticles(req);
+	const seriesQuery = {
+		filter: {
+			term: {
+				"annotations.idV2": {
+					value: seriesId
+				}
+			}
+		}
+	};
+	esQuery = _.merge(esQuery, seriesQuery);
+	es.searchArticles(esQuery)
+		.then(articles => {
+			setCache(res, searchStreamCache);
+			res.json(articles);
+		})
+		.catch(next);
+});
+
 //articles
 router.get('/articles', (req, res, next) => {
 	let esQuery = getEsQueryForArticles(req);
