@@ -83,6 +83,13 @@ router.get('/articles', (req, res, next) => {
 			})
 			.catch(next);
 	} else {
+		if (sanitizedSearchString.length > process.env['SEARCH_MAX_LENGTH']) {
+			return res.json({
+				hits: {
+					hits: []
+				}
+			})
+		}
 		const offset = parseInt(req.query.offset, 10) || 0;
 		const limit = parseInt(req.query.limit, 10) || 30;
 		let indexCount = 0;
