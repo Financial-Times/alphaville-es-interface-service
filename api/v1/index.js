@@ -129,6 +129,7 @@ router.get('/articles', (req, res, next) => {
 								values: articlesIds
 							}
 						},
+						size: limit,
 						sort: {
 							publishedDate: {
 								order: 'desc'
