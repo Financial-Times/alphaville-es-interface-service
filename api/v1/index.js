@@ -49,7 +49,7 @@ const getEsQueryForArticles = (req) => {
 	const limit = parseInt(req.query.limit, 10) || 30;
 	return {
 		sort: {
-			publishedDate: {
+			initialPublishedDate: {
 				order: 'desc'
 			}
 		},
@@ -131,7 +131,7 @@ router.get('/articles', (req, res, next) => {
 						},
 						size: limit,
 						sort: {
-							publishedDate: {
+							initialPublishedDate: {
 								order: 'desc'
 							}
 						}
@@ -165,7 +165,7 @@ const handleVanityArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.publishedDate);
+					const publishedDate = new Date(article._source.initialPublishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -193,7 +193,7 @@ const handleUuidArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.publishedDate);
+					const publishedDate = new Date(article._source.initialPublishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
