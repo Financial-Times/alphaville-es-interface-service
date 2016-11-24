@@ -109,7 +109,7 @@ router.get('/articles', (req, res, next) => {
 				hits: {
 					hits: []
 				}
-			})
+			});
 		}
 		const offset = parseInt(req.query.offset, 10) || 0;
 		const limit = parseInt(req.query.limit, 10) || 30;
@@ -149,7 +149,7 @@ router.get('/articles', (req, res, next) => {
 						hits: {
 							hits: []
 						}
-					})
+					});
 				}
 			})
 			.catch(console.log);
@@ -160,7 +160,10 @@ const handleVanityArticle = (req, res, next) => {
 	const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(req.params[0])}/`;
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => {
-			if (article.isMarketsLive) {
+			if (article.found === false) {
+				setNoCache(res);
+				res.status(404);
+			} else if (article.isMarketsLive) {
 				if (article.isLive) {
 					setNoCache(res);
 				} else {
@@ -188,7 +191,10 @@ const handleVanityArticle = (req, res, next) => {
 const handleUuidArticle = (req, res, next) => {
 	return es.getArticleByUuid(req.params[0])
 		.then(article => {
-			if (article.isMarketsLive) {
+			if (article.found === false) {
+				setNoCache(res);
+				res.status(404);
+			} else if (article.isMarketsLive) {
 				if (article.isLive) {
 					setNoCache(res);
 				} else {
