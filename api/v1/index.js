@@ -4,6 +4,8 @@ const es = require('alphaville-es-interface');
 const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
 const contentApi = require('../../services/content');
+const popularArticlesPoller = new (require('../../services/PopularArticlesPoller'))();
+const mostCommentedArticlesPoller = new (require('../../services/MostCommentedArticlesPoller'))();
 
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
@@ -359,6 +361,73 @@ router.get('/hotarticles', (req, res, next) => {
 		});
 	}).catch(next);
 });
+
+router.get('/most-read', (req, res, next) => {
+  console.log('most read: ', req.query.limit);
+  let limit = 30;
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit, 10);
+  }
+
+  popularArticlesPoller.get(limit).then(obj => {
+
+    const transformPromises = [];
+    const articles = {hits:{hits:[]}};
+
+    obj.forEach((article) => {
+      const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
+      articles.hits.hits.push({url:urlToSearch, count:article.count});
+    });
+
+    articles.hits.hits.forEach((article, index, source) => {
+      transformPromises.push(Promise.all([
+          es.getArticleByUrl(article.url).then(response => {
+            response.count = article.count;
+            source[index] = response;
+          })
+        ]))
+    })
+
+    return Promise.all(transformPromises).then(() => {
+      res.json(articles);
+    });
+
+  }).catch(next);
+});
+
+router.get('/most-commented', (req, res, next) => {
+  console.log('most commented: ', req.query.limit);
+  let limit = 30;
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit, 10);
+  }
+
+  mostCommentedArticlesPoller.get(limit).then(obj => {
+
+    const transformPromises = [];
+    const articles = {hits:{hits:[]}};
+
+    obj.forEach((article) => {
+      const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
+      articles.hits.hits.push({url:urlToSearch, count:article.count});
+    });
+
+    articles.hits.hits.forEach((article, index, source) => {
+      transformPromises.push(Promise.all([
+          es.getArticleByUrl(article.url).then(response => {
+            response.count = article.count;
+            source[index] = response;
+          })
+        ]))
+    })
+
+    return Promise.all(transformPromises).then(() => {
+      res.json(articles);
+    });
+
+  }).catch(next);
+});
+
 
 router.post('/purge', (req, res, next) => {
 	const url = req.body.url;
