@@ -121,7 +121,7 @@ router.get('/articles', (req, res, next) => {
 				if (parseInt(articles.results[0].indexCount, 10)) {
 					indexCount = articles.results[0].indexCount;
 					return articles.results[0].results.map(a => a.id);
-	 			}
+				}
 			})
 			.then(articlesIds => {
 				if (articlesIds) {
@@ -363,73 +363,73 @@ router.get('/hotarticles', (req, res, next) => {
 });
 
 router.get('/most-read', (req, res, next) => {
-  // console.log('most read: ', req.query.limit);
-  let limit = 30;
-  if (req.query.limit) {
-    limit = parseInt(req.query.limit, 10);
-  }
+	// console.log('most read: ', req.query.limit);
+	let limit = 30;
+	if (req.query.limit) {
+		limit = parseInt(req.query.limit, 10);
+	}
 
 	setCache(res, hotStreamCache);
 
-  popularArticlesPoller.get(limit).then(obj => {
+	popularArticlesPoller.get(limit).then(obj => {
 
-    const transformPromises = [];
-    const articles = {hits:{hits:[]}};
+		const transformPromises = [];
+		const articles = {hits:{hits:[]}};
 
-    obj.forEach((article) => {
-      const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
-      articles.hits.hits.push({url:urlToSearch, count:article.count});
-    });
+		obj.forEach((article) => {
+			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
+			articles.hits.hits.push({url:urlToSearch, count:article.count});
+		});
 
-    articles.hits.hits.forEach((article, index, source) => {
-      transformPromises.push(Promise.all([
-          es.getArticleByUrl(article.url).then(response => {
-            response.count = article.count;
-            source[index] = response;
-          })
-        ]))
-    })
+		articles.hits.hits.forEach((article, index, source) => {
+			transformPromises.push(Promise.all([
+					es.getArticleByUrl(article.url).then(response => {
+						response.count = article.count;
+						source[index] = response;
+					})
+				]))
+		})
 
-    return Promise.all(transformPromises).then(() => {
-      res.json(articles);
-    });
+		return Promise.all(transformPromises).then(() => {
+			res.json(articles);
+		});
 
-  }).catch(next);
+	}).catch(next);
 });
 
 router.get('/most-commented', (req, res, next) => {
-  // console.log('most commented: ', req.query.limit);
-  let limit = 30;
-  if (req.query.limit) {
-    limit = parseInt(req.query.limit, 10);
-  }
+	// console.log('most commented: ', req.query.limit);
+	let limit = 30;
+	if (req.query.limit) {
+		limit = parseInt(req.query.limit, 10);
+	}
 
 	setCache(res, hotStreamCache);
 
-  mostCommentedArticlesPoller.get(limit).then(obj => {
+	mostCommentedArticlesPoller.get(limit).then(obj => {
 
-    const transformPromises = [];
-    const articles = {hits:{hits:[]}};
+		const transformPromises = [];
+		const articles = {hits:{hits:[]}};
 
-    obj.forEach((article) => {
-      const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
-      articles.hits.hits.push({url:urlToSearch, count:article.count});
-    });
+		obj.forEach((article) => {
+			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
+			articles.hits.hits.push({url:urlToSearch, count:article.count});
+		});
 
-    articles.hits.hits.forEach((article, index, source) => {
-      transformPromises.push(Promise.all([
-          es.getArticleByUrl(article.url).then(response => {
-            response.count = article.count;
-            source[index] = response;
-          })
-        ]))
-    })
+		articles.hits.hits.forEach((article, index, source) => {
+			transformPromises.push(Promise.all([
+					es.getArticleByUrl(article.url).then(response => {
+						response.count = article.count;
+						source[index] = response;
+					})
+				]))
+		})
 
-    return Promise.all(transformPromises).then(() => {
-      res.json(articles);
-    });
+		return Promise.all(transformPromises).then(() => {
+			res.json(articles);
+		});
 
-  }).catch(next);
+	}).catch(next);
 });
 
 
