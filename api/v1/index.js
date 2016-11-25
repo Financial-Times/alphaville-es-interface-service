@@ -363,11 +363,13 @@ router.get('/hotarticles', (req, res, next) => {
 });
 
 router.get('/most-read', (req, res, next) => {
-  console.log('most read: ', req.query.limit);
+  // console.log('most read: ', req.query.limit);
   let limit = 30;
   if (req.query.limit) {
     limit = parseInt(req.query.limit, 10);
   }
+
+	setCache(res, hotStreamCache);
 
   popularArticlesPoller.get(limit).then(obj => {
 
@@ -396,11 +398,13 @@ router.get('/most-read', (req, res, next) => {
 });
 
 router.get('/most-commented', (req, res, next) => {
-  console.log('most commented: ', req.query.limit);
+  // console.log('most commented: ', req.query.limit);
   let limit = 30;
   if (req.query.limit) {
     limit = parseInt(req.query.limit, 10);
   }
+
+	setCache(res, hotStreamCache);
 
   mostCommentedArticlesPoller.get(limit).then(obj => {
 
