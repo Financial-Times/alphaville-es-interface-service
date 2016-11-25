@@ -25,7 +25,7 @@ const hotStreamCache = 600;
 const setCache = (res, value) => {
 	if (process.env.NODE_ENV === 'production') {
 		if (value > 0) {
-			res.set('Cache-Control', 'public, max-age=' + value);
+			res.set('Surrogate-Control', 'max-age=' + value);
 		} else {
 			setNoCache(res);
 		}
