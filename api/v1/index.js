@@ -67,55 +67,6 @@ router.use((req, res, next) => {
 	res.sendStatus(401);
 });
 
-router.get('/series', (req, res, next) => {
-	const series = req.query.series;
-	let esQuery = getEsQueryForArticles(req);
-	const seriesQuery = {
-		filter: {
-			term: {
-				"annotations.directType": {
-					value: "http://www.ft.com/ontology/AlphavilleSeries"
-				},
-				"annotations.prefLabel": {
-					value : series
-				}				
-			}
-		}
-	};
-	esQuery = _.merge(esQuery, seriesQuery);
-	es.searchArticles(esQuery)
-		.then(articles => {
-			setCache(res, searchStreamCache);
-			res.json(articles);
-		})
-		.catch(next);
-});
-
-
-router.get('/topic', (req, res, next) => {
-	const topic = req.query.topic;
-	let esQuery = getEsQueryForArticles(req);
-	const seriesQuery = {
-		filter: {
-			term: {
-				"annotations.directType": {
-					value: "http://www.ft.com/ontology/Topic"
-				},
-				"annotations.prefLabel": {
-					value : topic
-				}				
-			}
-		}
-	};
-	esQuery = _.merge(esQuery, seriesQuery);
-	es.searchArticles(esQuery)
-		.then(articles => {
-			setCache(res, searchStreamCache);
-			res.json(articles);
-		})
-		.catch(next);
-});
-
 //articles
 router.get('/articles', (req, res, next) => {
 	let esQuery = getEsQueryForArticles(req);
@@ -459,6 +410,56 @@ router.get('/most-commented', (req, res, next) => {
 
 	}).catch(next);
 });
+
+router.get('/series', (req, res, next) => {
+	const series = req.query.series;
+	let esQuery = getEsQueryForArticles(req);
+	const seriesQuery = {
+		filter: {
+			term: {
+				"annotations.directType": {
+					value: "http://www.ft.com/ontology/AlphavilleSeries"
+				},
+				"annotations.prefLabel": {
+					value : series
+				}				
+			}
+		}
+	};
+	esQuery = _.merge(esQuery, seriesQuery);
+	es.searchArticles(esQuery)
+		.then(articles => {
+			setCache(res, searchStreamCache);
+			res.json(articles);
+		})
+		.catch(next);
+});
+
+
+router.get('/topic', (req, res, next) => {
+	const topic = req.query.topic;
+	let esQuery = getEsQueryForArticles(req);
+	const seriesQuery = {
+		filter: {
+			term: {
+				"annotations.directType": {
+					value: "http://www.ft.com/ontology/Topic"
+				},
+				"annotations.prefLabel": {
+					value : topic
+				}				
+			}
+		}
+	};
+	esQuery = _.merge(esQuery, seriesQuery);
+	es.searchArticles(esQuery)
+		.then(articles => {
+			setCache(res, searchStreamCache);
+			res.json(articles);
+		})
+		.catch(next);
+});
+
 
 
 router.post('/purge', (req, res, next) => {
