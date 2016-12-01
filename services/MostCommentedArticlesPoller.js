@@ -13,7 +13,7 @@ KeenQuery.setConfig({
 const getMostCommentedArticles = () => new KeenQuery('comment:post')
   .count()
   .group('page.location.pathname')
-  .relTime('previous_3_days')
+  .relTime('this_3_days')
   .filter('context.app=alphaville')
   .filter('page.location.pathname~/')
   .filter('page.location.pathname!~/marketslive')
