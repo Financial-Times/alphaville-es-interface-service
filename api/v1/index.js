@@ -411,6 +411,70 @@ router.get('/most-commented', (req, res, next) => {
 	}).catch(next);
 });
 
+router.get('/type', (req, res, next) => {
+	const type = req.query.type;
+	let esQuery = getEsQueryForArticles(req);
+
+	if (type === 'Guest post'){
+		esQuery = _.merge(esQuery, {
+			filter: {
+				and : {
+					filters : [
+						{
+							regexp: {
+								webUrl: {
+									value: "(.*)guest-post(.*)"
+								}
+							}
+						},{
+							regexp: {
+								byline: {
+									value: "(.*)Guest writer(.*)"
+								}
+							}
+						}
+					]
+				}
+			}
+		});
+	} else if (type === 'FT Opening Quote'){
+		esQuery = _.merge(esQuery, {
+			filter: {
+				and : {
+					filters : [
+						{
+							regexp: {
+								webUrl: {
+									value: "(.*)opening-quote(.*)"
+								}
+							}
+						}
+					]
+				}
+			}
+		});
+	} else {
+		esQuery = _.merge(esQuery, {
+			filter : {
+				regexp: {
+					webUrl: {
+						value: `(.*)${type.toLowerCase().replace(' ', '-')}(.*)`
+					}
+				}
+			}
+		});
+
+	}
+
+	es.searchArticles(esQuery)
+		.then(articles => {
+			setCache(res, searchStreamCache);
+			res.json(articles);
+		})
+		.catch(next);
+});
+
+
 router.get('/series', (req, res, next) => {
 	const series = req.query.series;
 	let esQuery = getEsQueryForArticles(req);
