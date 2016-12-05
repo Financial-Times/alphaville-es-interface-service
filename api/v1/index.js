@@ -4,8 +4,7 @@ const es = require('alphaville-es-interface');
 const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
 const contentApi = require('../../services/content');
-const popularArticlesPoller = new (require('../../services/PopularArticlesPoller'))();
-const mostCommentedArticlesPoller = new (require('../../services/MostCommentedArticlesPoller'))();
+const KeenQueryPoller = require('../../services/KeenQueryPoller');
 
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
@@ -20,6 +19,34 @@ const searchStreamCache = 60;
 const authorStreamCache = 60;
 const mlStreamCache = 60;
 const hotStreamCache = 600;
+
+const mostCommentedArticlesPoller = new KeenQueryPoller(`comment:post
+  ->count()
+  ->group(page.location.pathname)
+  ->filter(context.app=alphaville)
+  ->filter(page.location.pathname~/)
+  ->filter(page.location.pathname!~/marketslive)
+  ->relTime(this_3_days)`);
+
+const popularArticlesPoller = new KeenQueryPoller(`page:view
+  ->count()
+  ->group(page.location.pathname)
+  ->filter(user.subscriptions.isStaff!=true)
+  ->filter(context.app=alphaville)
+  ->filter(page.location.pathname~/)
+  ->filter(page.location.pathname!=/)
+  ->filter(page.location.pathname!~/marketslive)
+  ->filter(page.location.pathname!~/search)
+  ->filter(page.location.pathname!~/uc_longroom)
+  ->filter(page.location.pathname!~/author)
+  ->filter(page.location.pathname!~/topic)
+  ->filter(page.location.pathname!~/series)
+  ->filter(page.location.pathname!~/type)
+  ->filter(page.location.pathname!~/home)
+  ->filter(page.location.pathname!~/alphachat)
+  ->filter(page.location.pathname!~/meet-the-team)
+  ->filter(page.location.pathname!~/page)
+  ->relTime(this_3_days)`);
 
 
 const setCache = (res, value) => {
