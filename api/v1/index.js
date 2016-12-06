@@ -480,7 +480,7 @@ router.get('/popular-topic', (req, res, next) => {
 	setCache(res, hotStreamCache);
 
 	mostPopularTopicPoller.get(limit).then(results => {
-		console.log('>>> results: ', results);
+		res.json(results);
 	});
 
 });
