@@ -4,12 +4,75 @@ const es = require('alphaville-es-interface');
 const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
 const contentApi = require('../../services/content');
-const KeenQueryPoller = require('../../services/KeenQueryPoller');
-
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 const mlVanityRegex = /(^\/marketslive\/+[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
 const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
+
+
+const KeenQuery = require('keen-query');
+
+KeenQuery.setConfig({
+  KEEN_PROJECT_ID: process.env.KEEN_PROJECT_ID,
+  KEEN_READ_KEY: process.env.KEEN_READ_KEY,
+  KEEN_HOST: 'https://keen-proxy.ft.com/3.0'
+});
+
+const getPopularArticles = () => new KeenQuery('page:view')
+  .count()
+  .group('page.location.pathname')
+  .relTime('this_3_days')
+  .filter('context.app=alphaville')
+  .filter('user.subscriptions.isStaff!=true')
+  .filter('page.location.pathname~/')
+  .filter('page.location.pathname!=/')
+  .filter('page.location.pathname!~/marketslive')
+  .filter('page.location.pathname!~/search')
+  .filter('page.location.pathname!~/uc_longroom')
+  .filter('page.location.pathname!~/author')
+  .filter('page.location.pathname!~/alphachat')
+  .filter('page.location.pathname!~/meet-the-team')
+  .filter('page.location.pathname!~/page')
+  .print('json')
+  .then(results => results.rows
+    .map(([ pathname, count]) => ({ pathname, count }))
+    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+  );
+
+const getMostCommentedArticles = () => new KeenQuery('comment:post')
+  .count()
+  .group('page.location.pathname')
+  .relTime('this_3_days')
+  .filter('context.app=alphaville')
+  .filter('user.subscriptions.isStaff!=true')
+  .filter('page.location.pathname~/')
+  .filter('page.location.pathname!~/marketslive')
+  .print('json')
+  .then(results => results.rows
+    .map(([ pathname, count]) => ({ pathname, count }))
+    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+  );
+
+const getMostPopularTopic = () => new KeenQuery('page:view')
+  .count()
+  .group('page.location.pathname')
+  .relTime('this_14_days')
+  .filter('context.app=alphaville')
+  .filter('user.subscriptions.isStaff!=true')
+  .filter('page.location.pathname~/topic')
+  .print('json')
+  .then(results => results.rows
+    .map(([ pathname, count]) => ({ pathname, count }))
+    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+  );
+
+
+const KeenQueryPoller = require('../../services/KeenQueryPoller');
+
+const popularArticlesPoller = new KeenQueryPoller(getPopularArticles);
+const mostCommentedArticlesPoller = new KeenQueryPoller(getMostCommentedArticles);
+const mostPopularTopicPoller = new KeenQueryPoller(getMostPopularTopic);
+
 
 const articleCache = 300;
 const mlCacheShort = 60;
@@ -19,35 +82,6 @@ const searchStreamCache = 60;
 const authorStreamCache = 60;
 const mlStreamCache = 60;
 const hotStreamCache = 600;
-
-const mostCommentedArticlesPoller = new KeenQueryPoller(`comment:post
-  ->count()
-  ->group(page.location.pathname)
-  ->filter(context.app=alphaville)
-  ->filter(page.location.pathname~/)
-  ->filter(page.location.pathname!~/marketslive)
-  ->relTime(this_3_days)`);
-
-const popularArticlesPoller = new KeenQueryPoller(`page:view
-  ->count()
-  ->group(page.location.pathname)
-  ->filter(user.subscriptions.isStaff!=true)
-  ->filter(context.app=alphaville)
-  ->filter(page.location.pathname~/)
-  ->filter(page.location.pathname!=/)
-  ->filter(page.location.pathname!~/marketslive)
-  ->filter(page.location.pathname!~/search)
-  ->filter(page.location.pathname!~/uc_longroom)
-  ->filter(page.location.pathname!~/author)
-  ->filter(page.location.pathname!~/topic)
-  ->filter(page.location.pathname!~/series)
-  ->filter(page.location.pathname!~/type)
-  ->filter(page.location.pathname!~/home)
-  ->filter(page.location.pathname!~/alphachat)
-  ->filter(page.location.pathname!~/meet-the-team)
-  ->filter(page.location.pathname!~/page)
-  ->relTime(this_3_days)`);
-
 
 const setCache = (res, value) => {
 	if (process.env.NODE_ENV === 'production') {
@@ -369,7 +403,6 @@ router.get('/hotarticles', (req, res, next) => {
 });
 
 router.get('/most-read', (req, res, next) => {
-	// console.log('most read: ', req.query.limit);
 	let limit = 30;
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit, 10);
@@ -404,7 +437,7 @@ router.get('/most-read', (req, res, next) => {
 });
 
 router.get('/most-commented', (req, res, next) => {
-	// console.log('most commented: ', req.query.limit);
+	console.log('most commented: ', req.query.limit);
 	let limit = 30;
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit, 10);
@@ -413,7 +446,6 @@ router.get('/most-commented', (req, res, next) => {
 	setCache(res, hotStreamCache);
 
 	mostCommentedArticlesPoller.get(limit).then(obj => {
-
 		const transformPromises = [];
 		const articles = {hits:{hits:[]}};
 
@@ -436,6 +468,21 @@ router.get('/most-commented', (req, res, next) => {
 		});
 
 	}).catch(next);
+});
+
+router.get('/popular-topic', (req, res, next) => {
+	console.log('/popular-topic');
+	let limit = 5;
+	if (req.query.limit) {
+		limit = parseInt(req.query.limit, 10);
+	}
+
+	setCache(res, hotStreamCache);
+
+	mostPopularTopicPoller.get(limit).then(results => {
+		console.log('>>> results: ', results);
+	});
+
 });
 
 router.get('/type', (req, res, next) => {
