@@ -577,7 +577,7 @@ router.get('/series', (req, res, next) => {
 router.get('/topic', (req, res, next) => {
 	const topic = req.query.topic;
 	let esQuery = getEsQueryForArticles(req);
-	const seriesQuery = {
+	const topicQuery = {
 		filter: {
 			term: {
 				"annotations.directType": {
@@ -589,7 +589,7 @@ router.get('/topic', (req, res, next) => {
 			}
 		}
 	};
-	esQuery = _.merge(esQuery, seriesQuery);
+	esQuery = _.merge(esQuery, topicQuery);
 	es.searchArticles(esQuery)
 		.then(articles => {
 			setCache(res, searchStreamCache);
