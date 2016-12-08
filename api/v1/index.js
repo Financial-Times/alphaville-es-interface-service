@@ -437,7 +437,6 @@ router.get('/most-read', (req, res, next) => {
 });
 
 router.get('/most-commented', (req, res, next) => {
-	console.log('most commented: ', req.query.limit);
 	let limit = 30;
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit, 10);
@@ -471,7 +470,6 @@ router.get('/most-commented', (req, res, next) => {
 });
 
 router.get('/popular-topic', (req, res, next) => {
-	console.log('/popular-topic');
 	let limit = 5;
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit, 10);
