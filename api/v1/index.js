@@ -112,7 +112,7 @@ const getEsQueryForArticles = (req) => {
 	const limit = parseInt(req.query.limit, 10) || 30;
 	return {
 		sort: {
-			initialPublishedDate: {
+			publishedDate: {
 				order: 'desc'
 			}
 		},
@@ -173,7 +173,7 @@ router.get('/articles', (req, res, next) => {
 						},
 						size: limit,
 						sort: {
-							initialPublishedDate: {
+							publishedDate: {
 								order: 'desc'
 							}
 						}
@@ -210,7 +210,7 @@ const handleVanityArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.initialPublishedDate);
+					const publishedDate = new Date(article._source.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -241,7 +241,7 @@ const handleUuidArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.initialPublishedDate);
+					const publishedDate = new Date(article._source.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -558,7 +558,7 @@ router.get('/series', (req, res, next) => {
 				},
 				"annotations.prefLabel": {
 					value : series
-				}				
+				}
 			}
 		}
 	};
@@ -583,7 +583,7 @@ router.get('/topic', (req, res, next) => {
 				},
 				"annotations.prefLabel": {
 					value : topic
-				}				
+				}
 			}
 		}
 	};
