@@ -1,0 +1,62 @@
+body {
+	font-family: metricweb, sans-serif;
+	text-align: center;
+	color: #333333; /* grey tint 5 */
+	background-color: #FFF1E0; /* pink */
+}
+
+pre {
+	max-height: 10em;
+	padding: 20px;
+	overflow: auto;
+	font-family: Consolas, 'Lucida Console', Monaco, monospace;
+	text-align: left;
+	background: #333333; /* grey tint 5 */
+	color: #FFFFFF;
+}
+
+pre:empty {
+	display: none;
+}
+
+a {
+	color: #27757B; /* teal 1 */
+}
+
+a:hover,
+button:hover {
+	color: #2BBBBf; /* teal 2 */
+}
+
+/*
+ * Layout
+ */
+
+.tools-container {
+	margin: 50px auto;
+	max-width: 480px;
+}
+
+.tools-heading {
+	padding-bottom: 30px;
+	margin-bottom: 30px;
+	border-bottom: 2px groove;
+}
+
+.tools-heading h1 {
+	font-weight: normal;
+}
+
+.tools-title {
+	font-weight: lighter;
+}
+
+.tools-description {
+	font-style: italic;
+}
+
+.o-forms {
+	padding: 20px;
+	background: #E9DECF; /* pink tint 2 */
+	border: 1px solid #CEC6B9; /* pink tint 3 */
+}

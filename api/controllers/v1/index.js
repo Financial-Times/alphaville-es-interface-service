@@ -1,9 +1,11 @@
 const _ = require('lodash');
 const router = require('express').Router();
-const es = require('alphaville-es-interface');
-const suds = require('../../services/suds');
-const fastly = require('../../services/fastly');
-const contentApi = require('../../services/content');
+const es = require('../../lib/es');
+const suds = require('../../lib/services/suds');
+const fastly = require('../../lib/services/fastly');
+const contentApi = require('../../lib/services/content');
+
+
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 const mlVanityRegex = /(^\/marketslive\/+[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
@@ -67,7 +69,7 @@ const getMostPopularTopic = () => new KeenQuery('page:view')
   );
 
 
-const KeenQueryPoller = require('../../services/KeenQueryPoller');
+const KeenQueryPoller = require('../../lib/services/KeenQueryPoller');
 
 const popularArticlesPoller = new KeenQueryPoller(getPopularArticles);
 const mostCommentedArticlesPoller = new KeenQueryPoller(getMostCommentedArticles);
@@ -122,7 +124,7 @@ const getEsQueryForArticles = (req) => {
 };
 
 router.use((req, res, next) => {
-	if (process.env['API_KEY'] === req.get('X-API-KEY')) {
+	if (process.env.API_KEY === req.get('X-API-KEY')) {
 		return next();
 	}
 	res.sendStatus(401);
@@ -558,7 +560,7 @@ router.get('/series', (req, res, next) => {
 				},
 				"annotations.prefLabel": {
 					value : series
-				}				
+				}
 			}
 		}
 	};
@@ -583,7 +585,7 @@ router.get('/topic', (req, res, next) => {
 				},
 				"annotations.prefLabel": {
 					value : topic
-				}				
+				}
 			}
 		}
 	};
@@ -607,5 +609,6 @@ router.post('/purge', (req, res, next) => {
 	}
 	return next('No path to purge provided');
 });
+
 
 module.exports = router;

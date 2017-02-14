@@ -1,4 +1,4 @@
-const config = require('../config');
+const config = require('../../../config');
 const fastly = require('fastly')(config.fastlyKey);
 const Promise = require('bluebird');
 
