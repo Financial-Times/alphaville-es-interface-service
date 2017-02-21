@@ -27,16 +27,6 @@ const errorHandler = (err, req, res, next) => {
 module.exports = (app, config) => {
 	app.use(cors());
 
-	if (config.env === config.dev) {
-		app.use(notFoundHandler);
-		app.use(errorHandler);
-		app.use(devErrorHandler());
-		app.use(morgan('dev'));
-	} else {
-		app.user(notFoundHandler);
-		app.use(errorHandler);
-	}
-
 	ftwebservice(app, {
 		manifestPath: path.join(__dirname, 'package.json'),
 		about: {
@@ -72,4 +62,14 @@ module.exports = (app, config) => {
 			});
 		}
 	});
+
+	if (config.env === config.dev) {
+		app.use(notFoundHandler);
+		app.use(errorHandler);
+		app.use(devErrorHandler());
+		app.use(morgan('dev'));
+	} else {
+		app.use(notFoundHandler);
+		app.use(errorHandler);
+	}
 };

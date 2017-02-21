@@ -17,8 +17,8 @@ const createServer = (config) => {
 	const app = express();
 	app.use(bodyParser.json());
 	app.disable('x-powered-by');
-	require('./appSetup')(app, config);
 	app.use(require('./router'));
+	require('./appSetup')(app, config);
 
 	const server = http.createServer(app);
 
