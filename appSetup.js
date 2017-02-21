@@ -16,8 +16,7 @@ const errorHandler = (err, req, res, next) => {
 	res.set('Cache-Control', 'private, no-cache, no-store');
 
 	if (err.status === 404) {
-		res.status(404);
-		res.render('error_404');
+		res.status(404).send("Not found");
 	} else {
 		res.status(503).send('<p>Internal Server Error</p>');
 		console.error(err.stack);
@@ -46,7 +45,7 @@ module.exports = (app, config) => {
 			"purpose": "Serving article data from Next Elastic and Alphaville Wordpress with Alphaville specific transformations.",
 			"audience": "public",
 			"primaryUrl": "https://ftalphaville-es-interface-service.ft.com",
-			"serviceTier": "gold"
+			"serviceTier": "bronze"
 		},
 		goodToGoTest: function() {
 			return new Promise(function(resolve) {
