@@ -96,6 +96,7 @@ const setCache = (res, value) => {
 };
 
 const setNoCache = (res) => {
+	res.set('Surrogate-Control', 'max-age=0');
 	res.set('Cache-Control', 'private, no-cache, no-store');
 };
 
@@ -194,7 +195,7 @@ router.get('/articles', (req, res, next) => {
 					});
 				}
 			})
-			.catch(console.log);
+			.catch(next);
 	}
 });
 
@@ -204,7 +205,7 @@ const handleVanityArticle = (req, res, next) => {
 		.then(article => {
 			if (article.found === false) {
 				setNoCache(res);
-				res.status(404);
+				next();
 			} else if (article.isMarketsLive) {
 				if (article.isLive) {
 					setNoCache(res);
@@ -235,7 +236,7 @@ const handleUuidArticle = (req, res, next) => {
 		.then(article => {
 			if (article.found === false) {
 				setNoCache(res);
-				res.status(404);
+				next();
 			} else if (article.isMarketsLive) {
 				if (article.isLive) {
 					setNoCache(res);

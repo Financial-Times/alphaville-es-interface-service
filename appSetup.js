@@ -5,22 +5,28 @@ const devErrorHandler = require('errorhandler');
 const ftwebservice = require('express-ftwebservice');
 const healthcheck = require('./health/healthchecks');
 
+// catch 404 and forward to error handler
+const notFoundHandler = function(req, res, next) {
+	const err = new Error('Not Found');
+	err.status = 404;
+	next(err);
+};
+
 const errorHandler = (err, req, res, next) => {
 	res.set('Cache-Control', 'private, no-cache, no-store');
 
-	res.status(500).send('<p>Internal Server Error</p>');
-	console.error(err.stack);
-	next(err);
+	if (err.status === 404) {
+		res.status(404);
+		res.render('error_404');
+	} else {
+		res.status(503).send('<p>Internal Server Error</p>');
+		console.error(err.stack);
+		next(err);
+	}
 };
 
 module.exports = (app, config) => {
 	app.use(cors());
-	if (config.env === config.dev) {
-		app.use(devErrorHandler());
-		app.use(morgan('dev'));
-	} else {
-		app.use(errorHandler);
-	}
 
 	ftwebservice(app, {
 		manifestPath: path.join(__dirname, 'package.json'),
@@ -57,4 +63,13 @@ module.exports = (app, config) => {
 			});
 		}
 	});
+
+	if (config.env === config.dev) {
+		app.use(notFoundHandler);
+		app.use(devErrorHandler());
+		app.use(morgan('dev'));
+	} else {
+		app.user(notFoundHandler);
+		app.use(errorHandler);
+	}
 };
