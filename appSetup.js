@@ -1,4 +1,3 @@
-const cors = require('cors');
 const morgan = require('morgan');
 const path = require('path');
 const devErrorHandler = require('errorhandler');
@@ -25,8 +24,6 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = (app, config) => {
-	app.use(cors());
-
 	ftwebservice(app, {
 		manifestPath: path.join(__dirname, 'package.json'),
 		about: {

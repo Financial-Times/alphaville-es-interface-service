@@ -3,6 +3,7 @@ const http = require('http');
 const _ = require('lodash');
 const throng = require('throng');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const defaultConfig = require('./config');
 
 const createServer = (config) => {
@@ -17,6 +18,8 @@ const createServer = (config) => {
 	const app = express();
 	app.use(bodyParser.json());
 	app.disable('x-powered-by');
+
+	app.use(cors());
 	app.use(require('./router'));
 	require('./appSetup')(app, config);
 
