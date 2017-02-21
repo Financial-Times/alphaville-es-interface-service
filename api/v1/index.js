@@ -207,7 +207,7 @@ const handleVanityArticle = (req, res, next) => {
 		.then(article => {
 			if (article.found === false) {
 				setNoCache(res);
-				next();
+				return next();
 			} else if (article.isMarketsLive) {
 				if (article.isLive) {
 					setNoCache(res);
@@ -238,7 +238,7 @@ const handleUuidArticle = (req, res, next) => {
 		.then(article => {
 			if (article.found === false) {
 				setNoCache(res);
-				next();
+				return next();
 			} else if (article.isMarketsLive) {
 				if (article.isLive) {
 					setNoCache(res);
