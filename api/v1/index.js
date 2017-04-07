@@ -205,7 +205,7 @@ const handleVanityArticle = (req, res, next) => {
 	const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(req.params[0])}/`;
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => {
-			if (article.found === false) {
+			if (!article) {
 				setNoCache(res);
 				res.status(404);
 			} else if (article.isMarketsLive) {
@@ -213,7 +213,7 @@ const handleVanityArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.publishedDate);
+					const publishedDate = new Date(article.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -236,7 +236,7 @@ const handleVanityArticle = (req, res, next) => {
 const handleUuidArticle = (req, res, next) => {
 	return es.getArticleByUuid(req.params[0])
 		.then(article => {
-			if (article.found === false) {
+			if (!article) {
 				setNoCache(res);
 				res.status(404);
 			} else if (article.isMarketsLive) {
@@ -244,7 +244,7 @@ const handleUuidArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.publishedDate);
+					const publishedDate = new Date(article.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -294,9 +294,9 @@ router.get('/author', (req, res, next) => {
 //marketslive
 router.get('/marketslive', (req, res, next) => {
 	const mlQuery = {
-		filter: {
-			and: {
-				filters: [
+		query: {
+			bool: {
+				must: [
 					{
 						term: {
 							"metadata.primary": {
@@ -386,8 +386,8 @@ router.get('/hotarticles', (req, res, next) => {
 			if (articles && articles.hits && articles.hits.hits) {
 				const sortedResult = [];
 				articles.hits.hits.forEach((article) => {
-					if (articleIds.indexOf(article._id) >= 0) {
-						sortedResult[articleIds.indexOf(article._id)] = article;
+					if (articleIds.indexOf(article.id) >= 0) {
+						sortedResult[articleIds.indexOf(article.id)] = article;
 					}
 				});
 
@@ -492,9 +492,9 @@ router.get('/type', (req, res, next) => {
 
 	if (type === 'Guest post'){
 		esQuery = _.merge(esQuery, {
-			filter: {
-				and : {
-					filters : [
+			query: {
+				bool: {
+					must: [
 						{
 							regexp: {
 								webUrl: {
@@ -514,9 +514,9 @@ router.get('/type', (req, res, next) => {
 		});
 	} else if (type === 'FT Opening Quote'){
 		esQuery = _.merge(esQuery, {
-			filter: {
-				and : {
-					filters : [
+			query: {
+				bool: {
+					must: [
 						{
 							regexp: {
 								webUrl: {
@@ -530,7 +530,7 @@ router.get('/type', (req, res, next) => {
 		});
 	} else {
 		esQuery = _.merge(esQuery, {
-			filter : {
+			query: {
 				regexp: {
 					webUrl: {
 						value: `(.*)${type.toLowerCase().replace(' ', '-')}(.*)`
@@ -554,7 +554,7 @@ router.get('/series', (req, res, next) => {
 	const series = req.query.series;
 	let esQuery = getEsQueryForArticles(req);
 	const seriesQuery = {
-		filter: {
+		query: {
 			term: {
 				"annotations.directType": {
 					value: "http://www.ft.com/ontology/AlphavilleSeries"
@@ -579,7 +579,7 @@ router.get('/topic', (req, res, next) => {
 	const topic = req.query.topic;
 	let esQuery = getEsQueryForArticles(req);
 	const topicQuery = {
-		filter: {
+		query: {
 			term: {
 				"annotations.directType": {
 					value: "http://www.ft.com/ontology/Topic"
