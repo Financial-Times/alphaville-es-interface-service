@@ -36,8 +36,8 @@ const getPopularArticles = () => new KeenQuery('page:view')
   .filter('page.location.pathname!~/page')
   .print('json')
   .then(results => results.rows
-    .map(([ pathname, count]) => ({ pathname, count }))
-    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	.map(([ pathname, count]) => ({ pathname, count }))
+	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
   );
 
 const getMostCommentedArticles = () => new KeenQuery('comment:post')
@@ -51,8 +51,8 @@ const getMostCommentedArticles = () => new KeenQuery('comment:post')
   .filter('page.location.pathname!~/longroom')
   .print('json')
   .then(results => results.rows
-    .map(([ pathname, count]) => ({ pathname, count }))
-    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	.map(([ pathname, count]) => ({ pathname, count }))
+	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
   );
 
 const getMostPopularTopic = () => new KeenQuery('page:view')
@@ -64,8 +64,8 @@ const getMostPopularTopic = () => new KeenQuery('page:view')
   .filter('page.location.pathname~/topic')
   .print('json')
   .then(results => results.rows
-    .map(([ pathname, count]) => ({ pathname, count }))
-    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	.map(([ pathname, count]) => ({ pathname, count }))
+	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
   );
 
 
@@ -292,12 +292,15 @@ router.get('/marketslive', (req, res, next) => {
 			bool: {
 				must: [
 					{
-						term: {
-							"metadata.primary": {
-								value: "section"
-							},
-							"metadata.idV1": {
-								value: "NzE=-U2VjdGlvbnM=" // Markets
+						"nested": {
+							"path": "metadata",
+							"query": {
+								"bool": {
+									"must": [
+										{ "term": { "metadata.primary": "section" } },
+										{ "term": { "metadata.idV1": "NzE=-U2VjdGlvbnM=" } }
+									]
+								}
 							}
 						}
 					},
