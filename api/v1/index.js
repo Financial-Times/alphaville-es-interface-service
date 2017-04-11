@@ -150,11 +150,7 @@ router.get('/articles', (req, res, next) => {
 			.catch(next);
 	} else {
 		if (sanitizedSearchString.length > process.env['SEARCH_MAX_LENGTH']) {
-			return res.json({
-				hits: {
-					hits: []
-				}
-			});
+			return res.json([]);
 		}
 		const offset = parseInt(req.query.offset, 10) || 0;
 		const limit = parseInt(req.query.limit, 10) || 30;
@@ -187,14 +183,12 @@ router.get('/articles', (req, res, next) => {
 			.then(articles => {
 				if (articles) {
 					setCache(res, searchStreamCache);
-					articles.hits.total = indexCount;
+					articles.total = indexCount;
 					res.json(articles);
 				} else {
-					res.json({
-						hits: {
-							hits: []
-						}
-					});
+					const emptyResult = [];
+					emptyResult.total = 0;
+					res.json(emptyResult);
 				}
 			})
 			.catch(next);
@@ -321,9 +315,9 @@ router.get('/marketslive', (req, res, next) => {
 	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
 	es.searchArticles(esQuery)
 		.then(articles => {
-			if (articles && articles.hits && articles.hits.hits) {
+			if (articles) {
 				let isLive = false;
-				articles.hits.hits.forEach(article => {
+				articles.forEach(article => {
 					if (article.isLive) {
 						isLive = true;
 					}
@@ -337,11 +331,9 @@ router.get('/marketslive', (req, res, next) => {
 
 				res.json(articles);
 			} else {
-				res.json({
-					hits: {
-						hits: []
-					}
-				});
+				const emptyResult = [];
+				emptyResult.total = 0;
+				res.json(emptyResult);
 			}
 		})
 		.catch(next);
@@ -383,23 +375,19 @@ router.get('/hotarticles', (req, res, next) => {
 			},
 			size: limit
 		}).then(articles => {
-			if (articles && articles.hits && articles.hits.hits) {
+			if (articles) {
 				const sortedResult = [];
-				articles.hits.hits.forEach((article) => {
+				articles.forEach((article) => {
 					if (articleIds.indexOf(article.id) >= 0) {
 						sortedResult[articleIds.indexOf(article.id)] = article;
 					}
 				});
 
-				articles.hits.hits = sortedResult.filter(a => a !== null);
+				articles = sortedResult.filter(a => a !== null);
 
 				res.json(articles);
 			} else {
-				res.json({
-					hits: {
-						hits: []
-					}
-				});
+				res.json([]);
 			}
 		});
 	}).catch(next);
@@ -416,14 +404,14 @@ router.get('/most-read', (req, res, next) => {
 	popularArticlesPoller.get(limit).then(obj => {
 
 		const transformPromises = [];
-		const articles = {hits:{hits:[]}};
+		const articles = [];
 
 		obj.forEach((article) => {
 			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
-			articles.hits.hits.push({url:urlToSearch, count:article.count});
+			articles.push({url:urlToSearch, count:article.count});
 		});
 
-		articles.hits.hits.forEach((article, index, source) => {
+		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
 					es.getArticleByUrl(article.url).then(response => {
 						response.count = article.count;
@@ -449,14 +437,14 @@ router.get('/most-commented', (req, res, next) => {
 
 	mostCommentedArticlesPoller.get(limit).then(obj => {
 		const transformPromises = [];
-		const articles = {hits:{hits:[]}};
+		const articles = [];
 
 		obj.forEach((article) => {
 			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
-			articles.hits.hits.push({url:urlToSearch, count:article.count});
+			articles.push({url:urlToSearch, count:article.count});
 		});
 
-		articles.hits.hits.forEach((article, index, source) => {
+		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
 					es.getArticleByUrl(article.url).then(response => {
 						response.count = article.count;
