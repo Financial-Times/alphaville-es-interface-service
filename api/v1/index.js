@@ -36,8 +36,8 @@ const getPopularArticles = () => new KeenQuery('page:view')
   .filter('page.location.pathname!~/page')
   .print('json')
   .then(results => results.rows
-    .map(([ pathname, count]) => ({ pathname, count }))
-    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	.map(([ pathname, count]) => ({ pathname, count }))
+	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
   );
 
 const getMostCommentedArticles = () => new KeenQuery('comment:post')
@@ -51,8 +51,8 @@ const getMostCommentedArticles = () => new KeenQuery('comment:post')
   .filter('page.location.pathname!~/longroom')
   .print('json')
   .then(results => results.rows
-    .map(([ pathname, count]) => ({ pathname, count }))
-    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	.map(([ pathname, count]) => ({ pathname, count }))
+	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
   );
 
 const getMostPopularTopic = () => new KeenQuery('page:view')
@@ -64,8 +64,8 @@ const getMostPopularTopic = () => new KeenQuery('page:view')
   .filter('page.location.pathname~/topic')
   .print('json')
   .then(results => results.rows
-    .map(([ pathname, count]) => ({ pathname, count }))
-    .sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	.map(([ pathname, count]) => ({ pathname, count }))
+	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
   );
 
 
@@ -150,11 +150,7 @@ router.get('/articles', (req, res, next) => {
 			.catch(next);
 	} else {
 		if (sanitizedSearchString.length > process.env['SEARCH_MAX_LENGTH']) {
-			return res.json({
-				hits: {
-					hits: []
-				}
-			});
+			return res.json([]);
 		}
 		const offset = parseInt(req.query.offset, 10) || 0;
 		const limit = parseInt(req.query.limit, 10) || 30;
@@ -187,14 +183,12 @@ router.get('/articles', (req, res, next) => {
 			.then(articles => {
 				if (articles) {
 					setCache(res, searchStreamCache);
-					articles.hits.total = indexCount;
+					articles.total = indexCount;
 					res.json(articles);
 				} else {
-					res.json({
-						hits: {
-							hits: []
-						}
-					});
+					const emptyResult = [];
+					emptyResult.total = 0;
+					res.json(emptyResult);
 				}
 			})
 			.catch(next);
@@ -205,7 +199,7 @@ const handleVanityArticle = (req, res, next) => {
 	const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(req.params[0])}/`;
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => {
-			if (article.found === false) {
+			if (!article) {
 				setNoCache(res);
 				res.status(404);
 			} else if (article.isMarketsLive) {
@@ -213,7 +207,7 @@ const handleVanityArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.publishedDate);
+					const publishedDate = new Date(article.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -236,7 +230,7 @@ const handleVanityArticle = (req, res, next) => {
 const handleUuidArticle = (req, res, next) => {
 	return es.getArticleByUuid(req.params[0])
 		.then(article => {
-			if (article.found === false) {
+			if (!article) {
 				setNoCache(res);
 				res.status(404);
 			} else if (article.isMarketsLive) {
@@ -244,7 +238,7 @@ const handleUuidArticle = (req, res, next) => {
 					setNoCache(res);
 				} else {
 					const today = new Date();
-					const publishedDate = new Date(article._source.publishedDate);
+					const publishedDate = new Date(article.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
 							&& publishedDate.getUTCMonth() === today.getUTCMonth()
@@ -294,16 +288,19 @@ router.get('/author', (req, res, next) => {
 //marketslive
 router.get('/marketslive', (req, res, next) => {
 	const mlQuery = {
-		filter: {
-			and: {
-				filters: [
+		query: {
+			bool: {
+				must: [
 					{
-						term: {
-							"metadata.primary": {
-								value: "section"
-							},
-							"metadata.idV1": {
-								value: "NzE=-U2VjdGlvbnM=" // Markets
+						"nested": {
+							"path": "metadata",
+							"query": {
+								"bool": {
+									"must": [
+										{ "term": { "metadata.primary": "section" } },
+										{ "term": { "metadata.idV1": "NzE=-U2VjdGlvbnM=" } }
+									]
+								}
 							}
 						}
 					},
@@ -321,9 +318,9 @@ router.get('/marketslive', (req, res, next) => {
 	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
 	es.searchArticles(esQuery)
 		.then(articles => {
-			if (articles && articles.hits && articles.hits.hits) {
+			if (articles) {
 				let isLive = false;
-				articles.hits.hits.forEach(article => {
+				articles.forEach(article => {
 					if (article.isLive) {
 						isLive = true;
 					}
@@ -337,11 +334,9 @@ router.get('/marketslive', (req, res, next) => {
 
 				res.json(articles);
 			} else {
-				res.json({
-					hits: {
-						hits: []
-					}
-				});
+				const emptyResult = [];
+				emptyResult.total = 0;
+				res.json(emptyResult);
 			}
 		})
 		.catch(next);
@@ -383,23 +378,19 @@ router.get('/hotarticles', (req, res, next) => {
 			},
 			size: limit
 		}).then(articles => {
-			if (articles && articles.hits && articles.hits.hits) {
+			if (articles) {
 				const sortedResult = [];
-				articles.hits.hits.forEach((article) => {
-					if (articleIds.indexOf(article._id) >= 0) {
-						sortedResult[articleIds.indexOf(article._id)] = article;
+				articles.forEach((article) => {
+					if (articleIds.indexOf(article.id) >= 0) {
+						sortedResult[articleIds.indexOf(article.id)] = article;
 					}
 				});
 
-				articles.hits.hits = sortedResult.filter(a => a !== null);
+				articles = sortedResult.filter(a => a !== null);
 
 				res.json(articles);
 			} else {
-				res.json({
-					hits: {
-						hits: []
-					}
-				});
+				res.json([]);
 			}
 		});
 	}).catch(next);
@@ -416,14 +407,14 @@ router.get('/most-read', (req, res, next) => {
 	popularArticlesPoller.get(limit).then(obj => {
 
 		const transformPromises = [];
-		const articles = {hits:{hits:[]}};
+		const articles = [];
 
 		obj.forEach((article) => {
 			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
-			articles.hits.hits.push({url:urlToSearch, count:article.count});
+			articles.push({url:urlToSearch, count:article.count});
 		});
 
-		articles.hits.hits.forEach((article, index, source) => {
+		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
 					es.getArticleByUrl(article.url).then(response => {
 						response.count = article.count;
@@ -449,14 +440,14 @@ router.get('/most-commented', (req, res, next) => {
 
 	mostCommentedArticlesPoller.get(limit).then(obj => {
 		const transformPromises = [];
-		const articles = {hits:{hits:[]}};
+		const articles = [];
 
 		obj.forEach((article) => {
 			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
-			articles.hits.hits.push({url:urlToSearch, count:article.count});
+			articles.push({url:urlToSearch, count:article.count});
 		});
 
-		articles.hits.hits.forEach((article, index, source) => {
+		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
 					es.getArticleByUrl(article.url).then(response => {
 						response.count = article.count;
@@ -492,9 +483,9 @@ router.get('/type', (req, res, next) => {
 
 	if (type === 'Guest post'){
 		esQuery = _.merge(esQuery, {
-			filter: {
-				and : {
-					filters : [
+			query: {
+				bool: {
+					must: [
 						{
 							regexp: {
 								webUrl: {
@@ -514,9 +505,9 @@ router.get('/type', (req, res, next) => {
 		});
 	} else if (type === 'FT Opening Quote'){
 		esQuery = _.merge(esQuery, {
-			filter: {
-				and : {
-					filters : [
+			query: {
+				bool: {
+					must: [
 						{
 							regexp: {
 								webUrl: {
@@ -530,7 +521,7 @@ router.get('/type', (req, res, next) => {
 		});
 	} else {
 		esQuery = _.merge(esQuery, {
-			filter : {
+			query: {
 				regexp: {
 					webUrl: {
 						value: `(.*)${type.toLowerCase().replace(' ', '-')}(.*)`
@@ -554,7 +545,7 @@ router.get('/series', (req, res, next) => {
 	const series = req.query.series;
 	let esQuery = getEsQueryForArticles(req);
 	const seriesQuery = {
-		filter: {
+		query: {
 			term: {
 				"annotations.directType": {
 					value: "http://www.ft.com/ontology/AlphavilleSeries"
@@ -579,7 +570,7 @@ router.get('/topic', (req, res, next) => {
 	const topic = req.query.topic;
 	let esQuery = getEsQueryForArticles(req);
 	const topicQuery = {
-		filter: {
+		query: {
 			term: {
 				"annotations.directType": {
 					value: "http://www.ft.com/ontology/Topic"
