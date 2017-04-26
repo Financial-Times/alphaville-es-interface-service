@@ -546,12 +546,15 @@ router.get('/series', (req, res, next) => {
 	let esQuery = getEsQueryForArticles(req);
 	const seriesQuery = {
 		query: {
-			term: {
-				"annotations.directType": {
-					value: "http://www.ft.com/ontology/AlphavilleSeries"
-				},
-				"annotations.prefLabel": {
-					value : series
+			nested: {
+				path: "annotations",
+				query: {
+					bool: {
+						filter: [
+							{ term: { "annotations.directType": "http://www.ft.com/ontology/AlphavilleSeries" } },
+							{ term: { "annotations.prefLabel": series } }
+						]
+					}
 				}
 			}
 		}
@@ -571,12 +574,15 @@ router.get('/topic', (req, res, next) => {
 	let esQuery = getEsQueryForArticles(req);
 	const topicQuery = {
 		query: {
-			term: {
-				"annotations.directType": {
-					value: "http://www.ft.com/ontology/Topic"
-				},
-				"annotations.prefLabel": {
-					value : topic
+			nested: {
+				path: "annotations",
+				query: {
+					bool: {
+						filter: [
+							{ term: { "annotations.directType": "http://www.ft.com/ontology/Topic" } },
+							{ term: { "annotations.prefLabel": topic } }
+						]
+					}
 				}
 			}
 		}
