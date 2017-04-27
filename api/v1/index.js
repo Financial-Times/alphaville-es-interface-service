@@ -13,60 +13,60 @@ const mlUuidRegex = /^\/marketslive\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-
 const KeenQuery = require('keen-query');
 
 KeenQuery.setConfig({
-  KEEN_PROJECT_ID: process.env.KEEN_PROJECT_ID,
-  KEEN_READ_KEY: process.env.KEEN_READ_KEY,
-  KEEN_HOST: 'https://keen-proxy.ft.com/3.0'
+	KEEN_PROJECT_ID: process.env.KEEN_PROJECT_ID,
+	KEEN_READ_KEY: process.env.KEEN_READ_KEY,
+	KEEN_HOST: 'https://keen-proxy.ft.com/3.0'
 });
 
 const getPopularArticles = () => new KeenQuery('page:view')
-  .count()
-  .group('page.location.pathname')
-  .relTime('this_3_days')
-  .filter('context.app=alphaville')
-  .filter('user.subscriptions.isStaff!=true')
-  .filter('page.location.pathname~/')
-  .filter('page.location.pathname!=/')
-  .filter('page.location.pathname!~/marketslive')
-  .filter('page.location.pathname!~/search')
-  .filter('page.location.pathname!~/uc_longroom')
-  .filter('page.location.pathname!~/longroom')
-  .filter('page.location.pathname!~/author')
-  .filter('page.location.pathname!~/alphachat')
-  .filter('page.location.pathname!~/meet-the-team')
-  .filter('page.location.pathname!~/page')
-  .print('json')
-  .then(results => results.rows
-	.map(([ pathname, count]) => ({ pathname, count }))
-	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
-  );
+	.count()
+	.group('page.location.pathname')
+	.relTime('this_3_days')
+	.filter('context.app=alphaville')
+	.filter('user.subscriptions.isStaff!=true')
+	.filter('page.location.pathname~/')
+	.filter('page.location.pathname!=/')
+	.filter('page.location.pathname!~/marketslive')
+	.filter('page.location.pathname!~/search')
+	.filter('page.location.pathname!~/uc_longroom')
+	.filter('page.location.pathname!~/longroom')
+	.filter('page.location.pathname!~/author')
+	.filter('page.location.pathname!~/alphachat')
+	.filter('page.location.pathname!~/meet-the-team')
+	.filter('page.location.pathname!~/page')
+	.print('json')
+	.then(results => results.rows
+		.map(([ pathname, count]) => ({ pathname, count }))
+		.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	);
 
 const getMostCommentedArticles = () => new KeenQuery('comment:post')
-  .count()
-  .group('page.location.pathname')
-  .relTime('this_3_days')
-  .filter('context.app=alphaville')
-  .filter('user.subscriptions.isStaff!=true')
-  .filter('page.location.pathname~/')
-  .filter('page.location.pathname!~/marketslive')
-  .filter('page.location.pathname!~/longroom')
-  .print('json')
-  .then(results => results.rows
-	.map(([ pathname, count]) => ({ pathname, count }))
-	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
-  );
+	.count()
+	.group('page.location.pathname')
+	.relTime('this_3_days')
+	.filter('context.app=alphaville')
+	.filter('user.subscriptions.isStaff!=true')
+	.filter('page.location.pathname~/')
+	.filter('page.location.pathname!~/marketslive')
+	.filter('page.location.pathname!~/longroom')
+	.print('json')
+	.then(results => results.rows
+		.map(([ pathname, count]) => ({ pathname, count }))
+		.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	);
 
 const getMostPopularTopic = () => new KeenQuery('page:view')
-  .count()
-  .group('page.location.pathname')
-  .relTime('this_14_days')
-  .filter('context.app=alphaville')
-  .filter('user.subscriptions.isStaff!=true')
-  .filter('page.location.pathname~/topic')
-  .print('json')
-  .then(results => results.rows
-	.map(([ pathname, count]) => ({ pathname, count }))
-	.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
-  );
+	.count()
+	.group('page.location.pathname')
+	.relTime('this_14_days')
+	.filter('context.app=alphaville')
+	.filter('user.subscriptions.isStaff!=true')
+	.filter('page.location.pathname~/topic')
+	.print('json')
+	.then(results => results.rows
+		.map(([ pathname, count]) => ({ pathname, count }))
+		.sort(({ count: countOne }, { count: countTwo }) => countTwo - countOne)
+	);
 
 
 const KeenQueryPoller = require('../../services/KeenQueryPoller');
@@ -210,8 +210,8 @@ const handleVanityArticle = (req, res, next) => {
 					const publishedDate = new Date(article.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
-							&& publishedDate.getUTCMonth() === today.getUTCMonth()
-							&& publishedDate.getUTCDate() === today.getUTCDate()) {
+						&& publishedDate.getUTCMonth() === today.getUTCMonth()
+						&& publishedDate.getUTCDate() === today.getUTCDate()) {
 						// on the day of publishing apply short cache
 						setCache(res, mlCacheShort);
 					} else {
@@ -241,8 +241,8 @@ const handleUuidArticle = (req, res, next) => {
 					const publishedDate = new Date(article.publishedDate);
 
 					if (publishedDate.getUTCFullYear() === today.getUTCFullYear()
-							&& publishedDate.getUTCMonth() === today.getUTCMonth()
-							&& publishedDate.getUTCDate() === today.getUTCDate()) {
+						&& publishedDate.getUTCMonth() === today.getUTCMonth()
+						&& publishedDate.getUTCDate() === today.getUTCDate()) {
 						// on the day of publishing apply short cache
 						setCache(res, mlCacheShort);
 					} else {
@@ -270,7 +270,10 @@ router.get('/author', (req, res, next) => {
 		const authorQuery = {
 			query: {
 				match: {
-					byline: `*${authorString}*`
+					byline: {
+						query: `*${authorString}*`,
+						operator: "and"
+					}
 				}
 			}
 		};
@@ -416,12 +419,12 @@ router.get('/most-read', (req, res, next) => {
 
 		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
-					es.getArticleByUrl(article.url).then(response => {
-						response.count = article.count;
-						source[index] = response;
-					})
-				]))
-		})
+				es.getArticleByUrl(article.url).then(response => {
+					response.count = article.count;
+					source[index] = response;
+				})
+			]))
+		});
 
 		return Promise.all(transformPromises).then(() => {
 			res.json(articles);
@@ -449,12 +452,12 @@ router.get('/most-commented', (req, res, next) => {
 
 		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
-					es.getArticleByUrl(article.url).then(response => {
-						response.count = article.count;
-						source[index] = response;
-					})
-				]))
-		})
+				es.getArticleByUrl(article.url).then(response => {
+					response.count = article.count;
+					source[index] = response;
+				})
+			]))
+		});
 
 		return Promise.all(transformPromises).then(() => {
 			res.json(articles);
@@ -484,20 +487,20 @@ router.get('/type', (req, res, next) => {
 	if (type === 'Guest post'){
 		esQuery = _.merge(esQuery, {
 			query: {
-				"bool": {
-					"must": [
+				bool: {
+					must: [
 						{
-							"match": {
-								"webUrl": {
-									"query": "guest-post",
-									"operator": "and"
+							match: {
+								webUrl: {
+									query: "guest-post",
+									operator: "and"
 								}
 							}
 						},{
-							"match": {
-								"byline": {
-									"query": "Guest writer",
-									"operator": "and"
+							match: {
+								byline: {
+									query: "Guest writer",
+									operator: "and"
 								}
 							}
 						}
@@ -513,7 +516,8 @@ router.get('/type', (req, res, next) => {
 						{
 							match: {
 								webUrl: {
-									query: "opening-quote"
+									query: "opening-quote",
+									operator: "and"
 								}
 							}
 						}
@@ -526,7 +530,8 @@ router.get('/type', (req, res, next) => {
 			query: {
 				match: {
 					webUrl: {
-						query: `${type.toLowerCase().replace(' ', '-')}`
+						query: `${type.toLowerCase().replace(' ', '-')}`,
+						operator: "and"
 					}
 				}
 			}
