@@ -14,7 +14,7 @@
   "author": "Dragos Digulescu <dragos.digulescu@ft.com> (https://github.com/ddigulescu)",
   "license": "ISC",
   "dependencies": {
-    "alphaville-es-interface": "github:financial-times/alphaville-es-interface#2.0.3",
+    "alphaville-es-interface": "github:financial-times/alphaville-es-interface#2.0.4",
     "alphaville-marketslive-wordpress-api": "github:financial-times/alphaville-marketslive-wordpress-api#0.4.0",
     "alphaville-team-members": "github:financial-times/alphaville-team-members#0.3.3",
     "keen-query": "^3.0.0",
