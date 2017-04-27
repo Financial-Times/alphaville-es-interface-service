@@ -269,7 +269,7 @@ router.get('/author', (req, res, next) => {
 	if (authorString) {
 		const authorQuery = {
 			query: {
-				wildcard : {
+				match: {
 					byline: `*${authorString}*`
 				}
 			}
@@ -484,18 +484,20 @@ router.get('/type', (req, res, next) => {
 	if (type === 'Guest post'){
 		esQuery = _.merge(esQuery, {
 			query: {
-				bool: {
-					must: [
+				"bool": {
+					"must": [
 						{
-							regexp: {
-								webUrl: {
-									value: "(.*)guest-post(.*)"
+							"match": {
+								"webUrl": {
+									"query": "guest-post",
+									"operator": "and"
 								}
 							}
 						},{
-							regexp: {
-								byline: {
-									value: "(.*)Guest writer(.*)"
+							"match": {
+								"byline": {
+									"query": "Guest writer",
+									"operator": "and"
 								}
 							}
 						}
@@ -509,9 +511,9 @@ router.get('/type', (req, res, next) => {
 				bool: {
 					must: [
 						{
-							regexp: {
+							match: {
 								webUrl: {
-									value: "(.*)opening-quote(.*)"
+									query: "opening-quote"
 								}
 							}
 						}
@@ -522,9 +524,9 @@ router.get('/type', (req, res, next) => {
 	} else {
 		esQuery = _.merge(esQuery, {
 			query: {
-				regexp: {
+				match: {
 					webUrl: {
-						value: `(.*)${type.toLowerCase().replace(' ', '-')}(.*)`
+						query: `${type.toLowerCase().replace(' ', '-')}`
 					}
 				}
 			}
