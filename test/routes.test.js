@@ -35,8 +35,8 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					expect(res.body.hits.hits).toBeAn(Array);
-					expect(res.body.hits.hits.length).toBe(1);
+					expect(res.body).toBeAn(Array);
+					expect(res.body.length).toBe(1);
 					done();
 				});
 		});
@@ -46,8 +46,8 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					expect(res.body.hits.hits).toBeAn(Array);
-					expect(res.body.hits.hits.length).toBe(1);
+					expect(res.body).toBeAn(Array);
+					expect(res.body.length).toBe(1);
 					done();
 				});
 		});
@@ -60,9 +60,9 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					expect(res.body.hits.hits).toBeAn(Array);
-					expect(res.body.hits.hits.length).toBe(1);
-					expect(res.body.hits.hits[0]._source.byline).toEqual(author);
+					expect(res.body).toBeAn(Array);
+					expect(res.body.length).toBe(1);
+					expect(res.body[0].byline).toEqual(author);
 					done();
 				});
 		});
@@ -78,7 +78,7 @@ describe('api routes', () => {
 				.expect(200)
 				.end((err, res) => {
 					articleId = res.body._id;
-					expect(res.body._source).toBeAn(Object);
+					expect(res.body).toBeAn(Object);
 					done();
 				});
 		});
@@ -88,7 +88,7 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					expect(res.body._source).toBeAn(Object);
+					expect(res.body).toBeAn(Object);
 					expect(res.body._id).toEqual(articleId);
 					done();
 				});
@@ -104,8 +104,8 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					expect(res.body.hits.hits).toBeAn(Array);
-					expect(res.body.hits.hits.length).toBe(1);
+					expect(res.body).toBeAn(Array);
+					expect(res.body.length).toBe(1);
 					done();
 				});
 		});
@@ -115,8 +115,8 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					mlArticleId = res.body._id;
-					expect(res.body._source).toBeAn(Object);
+					mlArticleId = res.body.id;
+					expect(res.body).toBeAn(Object);
 					done();
 				});
 		});
@@ -126,8 +126,8 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					expect(res.body._source).toBeAn(Object);
-					expect(res.body._id).toEqual(mlArticleId);
+					expect(res.body).toBeAn(Object);
+					expect(res.body.id).toEqual(mlArticleId);
 					done();
 				});
 		});
@@ -139,8 +139,8 @@ describe('api routes', () => {
 				.set('X-API-KEY', process.env['API_KEY'])
 				.expect(200)
 				.end((err, res) => {
-					expect(res.body.hits.hits).toBeAn(Array);
-					expect(res.body.hits.hits.length).toBe(1);
+					expect(res.body).toBeAn(Array);
+					expect(res.body.length).toBe(1);
 					done();
 				});
 		});
