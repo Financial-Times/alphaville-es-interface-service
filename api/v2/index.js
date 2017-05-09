@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const router = require('express').Router();
-const es = require('../../es/v1/main');
+const es = require('../../es/v2/main');
 const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
 const contentApi = require('../../services/content');
@@ -296,12 +296,12 @@ router.get('/marketslive', (req, res, next) => {
 				must: [
 					{
 						"nested": {
-							"path": "metadata",
+							"path": "annotations",
 							"query": {
 								"bool": {
 									"must": [
-										{ "term": { "metadata.primary": "section" } },
-										{ "term": { "metadata.idV1": "NzE=-U2VjdGlvbnM=" } }
+										{ "term": { "annotations.predicate": "http://www.ft.com/ontology/classification/isPrimarilyClassifiedBy" } },
+										{ "term": { "annotations.id": "d969d76e-f8f4-34ae-bc38-95cfd0884740" } }
 									]
 								}
 							}
