@@ -143,9 +143,9 @@ router.get('/articles', (req, res, next) => {
 
 	if (!sanitizedSearchString) {
 		es.searchArticles(esQuery)
-			.then(articles => {
+			.then(response => {
 				setCache(res, indexStreamCache);
-				res.json(articles);
+				res.json(response);
 			})
 			.catch(next);
 	} else {
@@ -183,11 +183,11 @@ router.get('/articles', (req, res, next) => {
 					return es.searchArticles(esQuery);
 				}
 			})
-			.then(articles => {
-				if (articles) {
+			.then(response => {
+				if (response) {
 					setCache(res, searchStreamCache);
-					articles.total = indexCount;
-					res.json(articles);
+					response.total = indexCount;
+					res.json(response);
 				} else {
 					const emptyResult = [];
 					emptyResult.total = 0;
@@ -283,10 +283,10 @@ router.get('/author', (req, res, next) => {
 		esQuery = _.merge(esQuery, authorQuery);
 	}
 	es.searchArticles(esQuery)
-		.then(articles => {
+		.then(response => {
 			setCache(res, authorStreamCache);
 
-			res.json(articles);
+			res.json(response);
 		})
 		.catch(next);
 });
@@ -323,10 +323,10 @@ router.get('/marketslive', (req, res, next) => {
 	};
 	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
 	es.searchArticles(esQuery)
-		.then(articles => {
-			if (articles) {
+		.then(response => {
+			if (response) {
 				let isLive = false;
-				articles.forEach(article => {
+				response.items.forEach(article => {
 					if (article.isLive) {
 						isLive = true;
 					}
@@ -338,7 +338,7 @@ router.get('/marketslive', (req, res, next) => {
 					setNoCache(res);
 				}
 
-				res.json(articles);
+				res.json(response);
 			} else {
 				const emptyResult = [];
 				emptyResult.total = 0;
@@ -383,18 +383,18 @@ router.get('/hotarticles', (req, res, next) => {
 				}
 			},
 			size: limit
-		}).then(articles => {
-			if (articles) {
+		}).then(response => {
+			if (response) {
 				const sortedResult = [];
-				articles.items.forEach((article) => {
+				response.items.forEach((article) => {
 					if (articleIds.indexOf(article.id) >= 0) {
 						sortedResult[articleIds.indexOf(article.id)] = article;
 					}
 				});
 
-				articles.items = sortedResult.filter(a => a !== null);
+				response.items = sortedResult.filter(a => a !== null);
 
-				res.json(articles);
+				res.json(response);
 			} else {
 				res.json({
 					items: [],
@@ -546,9 +546,9 @@ router.get('/type', (req, res, next) => {
 	}
 
 	es.searchArticles(esQuery)
-		.then(articles => {
+		.then(response => {
 			setCache(res, searchStreamCache);
-			res.json(articles);
+			res.json(response);
 		})
 		.catch(next);
 });
@@ -574,9 +574,9 @@ router.get('/series', (req, res, next) => {
 	};
 	esQuery = _.merge(esQuery, seriesQuery);
 	es.searchArticles(esQuery)
-		.then(articles => {
+		.then(response => {
 			setCache(res, searchStreamCache);
-			res.json(articles);
+			res.json(response);
 		})
 		.catch(next);
 });
@@ -602,9 +602,9 @@ router.get('/topic', (req, res, next) => {
 	};
 	esQuery = _.merge(esQuery, topicQuery);
 	es.searchArticles(esQuery)
-		.then(articles => {
+		.then(response => {
 			setCache(res, searchStreamCache);
-			res.json(articles);
+			res.json(response);
 		})
 		.catch(next);
 });
