@@ -89,7 +89,13 @@ function getAlphavilleEsQuery (query) {
 module.exports = {
 	searchArticles: function(query) {
 		return nEsClient.search(getAlphavilleEsQuery(query))
-			.then(processArticles);
+			.then(processArticles)
+			.then(articleList => {
+				return {
+					items: articleList || [],
+					total: articleList.total || 0
+				};
+			});
 	},
 	getArticleByUuid: function (uuid) {
 		return nEsClient.get(uuid)

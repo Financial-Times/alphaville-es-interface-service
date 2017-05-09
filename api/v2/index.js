@@ -150,7 +150,10 @@ router.get('/articles', (req, res, next) => {
 			.catch(next);
 	} else {
 		if (sanitizedSearchString.length > process.env['SEARCH_MAX_LENGTH']) {
-			return res.json([]);
+			return res.json({
+				items: [],
+				total: 0
+			});
 		}
 		const offset = parseInt(req.query.offset, 10) || 0;
 		const limit = parseInt(req.query.limit, 10) || 30;
@@ -383,17 +386,20 @@ router.get('/hotarticles', (req, res, next) => {
 		}).then(articles => {
 			if (articles) {
 				const sortedResult = [];
-				articles.forEach((article) => {
+				articles.items.forEach((article) => {
 					if (articleIds.indexOf(article.id) >= 0) {
 						sortedResult[articleIds.indexOf(article.id)] = article;
 					}
 				});
 
-				articles = sortedResult.filter(a => a !== null);
+				articles.items = sortedResult.filter(a => a !== null);
 
 				res.json(articles);
 			} else {
-				res.json([]);
+				res.json({
+					items: [],
+					total: 0
+				});
 			}
 		});
 	}).catch(next);
