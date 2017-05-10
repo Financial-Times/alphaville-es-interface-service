@@ -426,14 +426,16 @@ router.get('/most-read', (req, res, next) => {
 		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
 				es.getArticleByUrl(article.url).then(response => {
-					response.count = article.count;
+					if (response) {
+						response.count = article.count;
+					}
 					source[index] = response;
 				})
-			]))
+			]));
 		});
 
 		return Promise.all(transformPromises).then(() => {
-			res.json(articles);
+			res.json(articles.filter(article => article !== null));
 		});
 
 	}).catch(next);
@@ -452,6 +454,7 @@ router.get('/most-commented', (req, res, next) => {
 		const articles = [];
 
 		obj.forEach((article) => {
+			console.log(article);
 			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
 			articles.push({url:urlToSearch, count:article.count});
 		});
@@ -459,14 +462,16 @@ router.get('/most-commented', (req, res, next) => {
 		articles.forEach((article, index, source) => {
 			transformPromises.push(Promise.all([
 				es.getArticleByUrl(article.url).then(response => {
-					response.count = article.count;
+					if (response) {
+						response.count = article.count;
+					}
 					source[index] = response;
 				})
-			]))
+			]));
 		});
 
 		return Promise.all(transformPromises).then(() => {
-			res.json(articles);
+			res.json(articles.filter(article => article !== null));
 		});
 
 	}).catch(next);
@@ -482,7 +487,7 @@ router.get('/popular-topic', (req, res, next) => {
 
 	mostPopularTopicPoller.get(limit).then(results => {
 		res.json(results);
-	});
+	}).catch(next);
 
 });
 
