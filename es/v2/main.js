@@ -93,7 +93,7 @@ module.exports = {
 			.then(articleList => {
 				return {
 					items: articleList || [],
-					total: articleList.total || 0
+					total: articleList ? articleList.total || 0 : 0
 				};
 			});
 	},
