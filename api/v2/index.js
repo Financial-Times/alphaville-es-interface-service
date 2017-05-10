@@ -416,7 +416,7 @@ router.get('/most-read', (req, res, next) => {
 	popularArticlesPoller.get(limit).then(obj => {
 
 		const transformPromises = [];
-		const articles = [];
+		let articles = [];
 
 		obj.forEach((article) => {
 			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
@@ -435,7 +435,12 @@ router.get('/most-read', (req, res, next) => {
 		});
 
 		return Promise.all(transformPromises).then(() => {
-			res.json(articles.filter(article => article !== null));
+			articles = articles.filter(article => article !== null).slice(0, limit);
+
+			res.json({
+				items: articles,
+				total: articles.length
+			});
 		});
 
 	}).catch(next);
@@ -449,12 +454,11 @@ router.get('/most-commented', (req, res, next) => {
 
 	setCache(res, hotStreamCache);
 
-	mostCommentedArticlesPoller.get(limit).then(obj => {
+	mostCommentedArticlesPoller.get(limit + 5).then(obj => {
 		const transformPromises = [];
-		const articles = [];
+		let articles = [];
 
 		obj.forEach((article) => {
-			console.log(article);
 			const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(article.pathname)}/`;
 			articles.push({url:urlToSearch, count:article.count});
 		});
@@ -471,7 +475,12 @@ router.get('/most-commented', (req, res, next) => {
 		});
 
 		return Promise.all(transformPromises).then(() => {
-			res.json(articles.filter(article => article !== null));
+			articles = articles.filter(article => article !== null).slice(0, limit);
+
+			res.json({
+				items: articles,
+				total: articles.length
+			});
 		});
 
 	}).catch(next);
@@ -485,7 +494,7 @@ router.get('/popular-topic', (req, res, next) => {
 
 	setCache(res, hotStreamCache);
 
-	mostPopularTopicPoller.get(limit).then(results => {
+	mostPopularTopicPoller.get(limit + 5).then(results => {
 		res.json(results);
 	}).catch(next);
 
