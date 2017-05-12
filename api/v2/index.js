@@ -1,9 +1,8 @@
 const _ = require('lodash');
-const router = require('express').Router();
+const router = new (require('express')).Router();
 const es = require('../../es/v2/main');
 const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
-const contentApi = require('../../services/content');
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
 const mlVanityRegex = /(^\/marketslive\/+[0-9]+\-[0-9]+\-[0-9]+-?[0-9]+?\/?)$/;
@@ -155,43 +154,29 @@ router.get('/articles', (req, res, next) => {
 				total: 0
 			});
 		}
-		const offset = parseInt(req.query.offset, 10) || 0;
-		const limit = parseInt(req.query.limit, 10) || 30;
-		let indexCount = 0;
-		contentApi.search(sanitizedSearchString, limit, offset)
-			.then(articles => {
-				if (parseInt(articles.results[0].indexCount, 10)) {
-					indexCount = articles.results[0].indexCount;
-					return articles.results[0].results.map(a => a.id);
+
+		const searchQuery = {
+			min_score: 0.8,
+			query: {
+				multi_match: {
+					query: sanitizedSearchString,
+					type: "most_fields",
+					fields: ['title', 'bodyHTML', 'byline']
 				}
-			})
-			.then(articlesIds => {
-				if (articlesIds) {
-					esQuery = {
-						query: {
-							ids: {
-								values: articlesIds
-							}
-						},
-						size: limit,
-						sort: {
-							publishedDate: {
-								order: 'desc'
-							}
-						}
-					};
-					return es.searchArticles(esQuery);
-				}
-			})
-			.then(response => {
+			}
+		};
+
+		esQuery = _.merge(esQuery, searchQuery);
+
+		es.searchArticles(esQuery).then(response => {
 				if (response) {
 					setCache(res, searchStreamCache);
-					response.total = indexCount;
 					res.json(response);
 				} else {
-					const emptyResult = [];
-					emptyResult.total = 0;
-					res.json(emptyResult);
+					res.json({
+						items: [],
+						total: 0
+					});
 				}
 			})
 			.catch(next);
