@@ -7,7 +7,6 @@ appRouter.get('/__gtg', (req, res) => {
 	res.sendStatus(200);
 });
 
-appRouter.use('/v1', require('./api/v1'));
 appRouter.use('/v2', require('./api/v2'));
 
 module.exports = appRouter;
