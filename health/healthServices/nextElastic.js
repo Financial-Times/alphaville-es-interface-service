@@ -1,7 +1,7 @@
 "use strict";
 
 const _ = require('lodash');
-const fetch = require('node-fetch');
+const nEsClient = require('@financial-times/n-es-client');
 
 const healthCheckModel = {
 	id: 'next-elastic',
@@ -19,14 +19,13 @@ exports.getHealth = function () {
 	return new Promise((resolve) => {
 		const currentHealth = _.clone(healthCheckModel);
 
-		fetch(`http://${process.env['ELASTIC_SEARCH_URL']}/v3_api_v2/item/eb634bb5-f4f5-347d-9514-4688c5c67e30`)
+		nEsClient.get('eb634bb5-f4f5-347d-9514-4688c5c67e30')
 			.then(res => {
-				if (res.ok) {
-					return res.json();
+				if (res) {
+					currentHealth.ok = true;
+					resolve(_.omit(currentHealth, ['checkOutput']));
 				} else {
-					const error = new Error(res.statusText);
-					error.response = res;
-					throw error;
+					throw new Error("No response");
 				}
 			})
 			.then(() => {
