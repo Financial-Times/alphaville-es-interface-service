@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const router = new (require('express')).Router();
-const moment = require('moment-timezone');
 const es = require('../../es/v2/main');
 const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
@@ -313,10 +312,6 @@ router.get('/marketslive', (req, res, next) => {
 			if (response) {
 				let isLive = false;
 				response.items.forEach(article => {
-					if (article.webUrl.indexOf('marketslive') === -1) {
-						let mlDate = moment(article.firstPublishedDate).format('YYYY-MM-DD');
-						article.webUrl = `http://ftalphaville.ft.com/marketslive/${mlDate}/`
-					}
 					if (article.isLive) {
 						isLive = true;
 					}
