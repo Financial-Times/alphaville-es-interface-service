@@ -2,6 +2,7 @@ const _ = require('lodash');
 const router = new (require('express')).Router();
 const es = require('../../es/v2/main');
 const suds = require('../../services/suds');
+const moment = require('moment-timezone');
 const fastly = require('../../services/fastly');
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
@@ -16,6 +17,16 @@ KeenQuery.setConfig({
 	KEEN_READ_KEY: process.env.KEEN_READ_KEY,
 	KEEN_HOST: 'https://keen-proxy.ft.com/3.0'
 });
+
+const fixWebUrl = (articles) => {
+	return articles.map(article => {
+		if (article.realtime === true && article.webUrl.indexOf('marketslive') === -1) {
+			let mlDate = moment(article.firstPublishedDate).format('YYYY-MM-DD');
+			article.webUrl = `http://ftalphaville.ft.com/marketslive/${mlDate}/`
+		}
+		return article;
+	})
+};
 
 const getPopularArticles = () => new KeenQuery('page:view')
 	.count()
@@ -307,7 +318,7 @@ router.get('/marketslive', (req, res, next) => {
 		}
 	};
 	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
-	es.searchArticles(esQuery)
+	es.searchArticles(esQuery, fixWebUrl)
 		.then(response => {
 			if (response) {
 				let isLive = false;
