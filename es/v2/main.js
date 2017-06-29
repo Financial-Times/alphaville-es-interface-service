@@ -1,6 +1,7 @@
 const WpApi = require('alphaville-marketslive-wordpress-api');
 WpApi.setBaseUrl(process.env.WP_URL);
 
+const moment = require('moment-timezone');
 const nEsClient = require('@financial-times/n-es-client');
 const images = require('./lib/images');
 const summaries = require('./lib/summaries');
@@ -86,16 +87,21 @@ function getAlphavilleEsQuery (query) {
 	return query;
 }
 
+const fixMlWebUrls = (articles) => {
+	return articles.map(article => {
+		if (article.realtime === true && article.webUrl.indexOf('marketslive') === -1) {
+			let mlDate = moment(article.firstPublishedDate).format('YYYY-MM-DD');
+			article.webUrl = `http://ftalphaville.ft.com/marketslive/${mlDate}/`
+		}
+		return article;
+	});
+};
+
 
 module.exports = {
-	searchArticles: function(query, runFirst) {
+	searchArticles: function(query) {
 		return nEsClient.search(getAlphavilleEsQuery(query))
-			.then(articles => {
-				if (typeof runFirst === 'function') {
-					return runFirst(articles);
-				}
-				return articles;
-			})
+			.then(fixMlWebUrls)
 			.then(processArticles)
 			.then(articleList => {
 				return {
