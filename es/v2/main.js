@@ -100,13 +100,18 @@ const fixMlWebUrls = (articles) => {
 
 module.exports = {
 	searchArticles: function(query) {
+		let total = 0;
 		return nEsClient.search(getAlphavilleEsQuery(query))
+			.then(articles => {
+				total = articles.total;
+				return articles;
+			})
 			.then(fixMlWebUrls)
 			.then(processArticles)
 			.then(articleList => {
 				return {
 					items: articleList || [],
-					total: articleList ? articleList.total || 0 : 0
+					total: articleList ? total || 0 : 0
 				};
 			});
 	},
