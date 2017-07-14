@@ -141,8 +141,8 @@ module.exports = {
 	getArticleByUrl: function (url) {
 		return nEsClient.search(getAlphavilleEsQuery({
 					query: {
-						match_phrase: {
-							webUrl: url.replace(/[^\x00-\x7F]/g, (a) => encodeURI(a).toLowerCase())
+						wildcard: {
+							'webUrl.raw': url.replace(/[^\x00-\x7F]/g, (a) => encodeURI(a).toLowerCase())
 						}
 					},
 					size: 1,
