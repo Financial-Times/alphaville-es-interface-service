@@ -158,10 +158,8 @@ router.get('/articles', (req, res, next) => {
 		const searchQuery = {
 			min_score: 0.8,
 			query: {
-				multi_match: {
-					query: sanitizedSearchString,
-					type: "most_fields",
-					fields: ['title', 'bodyHTML', 'byline']
+				match: {
+					frontmatter: sanitizedSearchString
 				}
 			}
 		};
