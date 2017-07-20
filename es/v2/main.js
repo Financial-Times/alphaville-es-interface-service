@@ -142,7 +142,7 @@ module.exports = {
 		return nEsClient.search(getAlphavilleEsQuery({
 					query: {
 						wildcard: {
-							'webUrl.raw': url.replace(/[^\x00-\x7F]/g, (a) => encodeURI(a).toLowerCase())
+							webUrl: url.replace(/[^\x00-\x7F]/g, (a) => encodeURI(a).toLowerCase())
 						}
 					},
 					size: 1,
