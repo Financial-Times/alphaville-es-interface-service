@@ -495,7 +495,7 @@ router.get('/type', (req, res, next) => {
 				bool: {
 					must: [
 						{
-							match: {
+							wildcard: {
 								webUrl: {
 									query: "*guest-post*",
 									operator: "and"
@@ -519,7 +519,7 @@ router.get('/type', (req, res, next) => {
 				bool: {
 					must: [
 						{
-							match: {
+							wildcard: {
 								webUrl: {
 									query: "*opening-quote*",
 									operator: "and"
@@ -533,7 +533,7 @@ router.get('/type', (req, res, next) => {
 	} else {
 		esQuery = _.merge(esQuery, {
 			query: {
-				match: {
+				wildcard: {
 					webUrl: {
 						query: `*${type.toLowerCase().replace(' ', '-')}*`,
 						operator: "and"
