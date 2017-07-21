@@ -1,6 +1,7 @@
 const WpApi = require('alphaville-marketslive-wordpress-api');
 WpApi.setBaseUrl(process.env.WP_URL);
 
+const moment = require('moment-timezone');
 const nEsClient = require('@financial-times/n-es-client');
 const images = require('./lib/images');
 const summaries = require('./lib/summaries');
@@ -86,14 +87,31 @@ function getAlphavilleEsQuery (query) {
 	return query;
 }
 
+const fixMlWebUrls = (articles) => {
+	return articles.map(article => {
+		if (article.realtime === true && article.webUrl.indexOf('marketslive') === -1) {
+			let mlDate = moment(article.firstPublishedDate).format('YYYY-MM-DD');
+			article.webUrl = `http://ftalphaville.ft.com/marketslive/${mlDate}/`
+		}
+		return article;
+	});
+};
+
+
 module.exports = {
 	searchArticles: function(query) {
+		let total = 0;
 		return nEsClient.search(getAlphavilleEsQuery(query))
+			.then(articles => {
+				total = articles.total;
+				return articles;
+			})
+			.then(fixMlWebUrls)
 			.then(processArticles)
 			.then(articleList => {
 				return {
 					items: articleList || [],
-					total: articleList ? articleList.total || 0 : 0
+					total: articleList ? total || 0 : 0
 				};
 			});
 	},
@@ -123,7 +141,7 @@ module.exports = {
 	getArticleByUrl: function (url) {
 		return nEsClient.search(getAlphavilleEsQuery({
 					query: {
-						match_phrase: {
+						wildcard: {
 							webUrl: url.replace(/[^\x00-\x7F]/g, (a) => encodeURI(a).toLowerCase())
 						}
 					},

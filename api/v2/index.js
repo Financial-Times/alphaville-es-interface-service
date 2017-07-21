@@ -160,8 +160,8 @@ router.get('/articles', (req, res, next) => {
 			query: {
 				multi_match: {
 					query: sanitizedSearchString,
-					type: "most_fields",
-					fields: ['title', 'bodyHTML', 'byline']
+					type: 'most_fields',
+					fields: ['frontmatter', 'bodyHTML']
 				}
 			}
 		};
@@ -294,12 +294,12 @@ router.get('/marketslive', (req, res, next) => {
 								}
 							}
 						}
-					},
+					}
+				],
+				filter: [
 					{
-						regexp: {
-							webUrl: {
-								value: "(.*)marketslive(.*)"
-							}
+						term: {
+							"realtime": true
 						}
 					}
 				]
