@@ -497,13 +497,13 @@ router.get('/type', (req, res, next) => {
 						{
 							match: {
 								webUrl: {
-									query: "guest-post",
+									query: "*guest-post*",
 									operator: "and"
 								}
 							}
 						},{
 							match: {
-								byline: {
+								'frontmatter.byline': {
 									query: "Guest writer",
 									operator: "and"
 								}
@@ -521,7 +521,7 @@ router.get('/type', (req, res, next) => {
 						{
 							match: {
 								webUrl: {
-									query: "opening-quote",
+									query: "*opening-quote*",
 									operator: "and"
 								}
 							}
@@ -535,7 +535,7 @@ router.get('/type', (req, res, next) => {
 			query: {
 				match: {
 					webUrl: {
-						query: `${type.toLowerCase().replace(' ', '-')}`,
+						query: `*${type.toLowerCase().replace(' ', '-')}*`,
 						operator: "and"
 					}
 				}
