@@ -496,17 +496,11 @@ router.get('/type', (req, res, next) => {
 					must: [
 						{
 							wildcard: {
-								webUrl: {
-									query: "*guest-post*",
-									operator: "and"
-								}
+								webUrl: "*guest-post*"
 							}
 						},{
-							match: {
-								'frontmatter.byline': {
-									query: "Guest writer",
-									operator: "and"
-								}
+							match_phrase: {
+								byline: "Guest writer"
 							}
 						}
 					]
@@ -520,10 +514,7 @@ router.get('/type', (req, res, next) => {
 					must: [
 						{
 							wildcard: {
-								webUrl: {
-									query: "*opening-quote*",
-									operator: "and"
-								}
+								webUrl: "*opening-quote*"
 							}
 						}
 					]
@@ -534,10 +525,7 @@ router.get('/type', (req, res, next) => {
 		esQuery = _.merge(esQuery, {
 			query: {
 				wildcard: {
-					webUrl: {
-						query: `*${type.toLowerCase().replace(' ', '-')}*`,
-						operator: "and"
-					}
+					webUrl: `*${type.toLowerCase().replace(' ', '-')}*`
 				}
 			}
 		});
