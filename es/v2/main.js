@@ -23,7 +23,7 @@ function processArticles(response) {
 	response.forEach((article) => {
 		transformPromises.push(Promise.all([
 			categorization.processArticle(article),
-			avSeries.processArticle(article, {}),
+			avSeries.processArticle(article, {resultSize:20}),
 			webUrl.processArticle(article),
 			bodyHTML.processArticle(article)
 				.then(images.processArticle)
