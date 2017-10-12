@@ -278,10 +278,11 @@ router.get('/author', (req, res, next) => {
 
 //marketslive
 router.get('/marketslive', (req, res, next) => {
+	// backward and forward compatibility with the transition from sections to topics
 	const mlQuery = {
 		query: {
 			bool: {
-				must: [
+				should: [
 					{
 						"nested": {
 							"path": "annotations",
@@ -290,6 +291,32 @@ router.get('/marketslive', (req, res, next) => {
 									"must": [
 										{ "term": { "annotations.predicate": "http://www.ft.com/ontology/classification/isPrimarilyClassifiedBy" } },
 										{ "term": { "annotations.id": "d969d76e-f8f4-34ae-bc38-95cfd0884740" } }
+									]
+								}
+							}
+						}
+					},
+					{
+						"nested": {
+							"path": "annotations",
+							"query": {
+								"bool": {
+									"must": [
+										{ "term": { "annotations.predicate": "http://www.ft.com/ontology/classification/isPrimarilyClassifiedBy" } },
+										{ "term": { "annotations.id": "c91b1fad-1097-468b-be82-9a8ff717d54c" } }
+									]
+								}
+							}
+						}
+					},
+					{
+						"nested": {
+							"path": "annotations",
+							"query": {
+								"bool": {
+									"must": [
+										{ "term": { "annotations.predicate": "http://www.ft.com/ontology/annotation/about" } },
+										{ "term": { "annotations.id": "c91b1fad-1097-468b-be82-9a8ff717d54c" } }
 									]
 								}
 							}
@@ -307,6 +334,7 @@ router.get('/marketslive', (req, res, next) => {
 		}
 	};
 	const esQuery = _.merge(getEsQueryForArticles(req), mlQuery);
+
 	es.searchArticles(esQuery)
 		.then(response => {
 			if (response) {
