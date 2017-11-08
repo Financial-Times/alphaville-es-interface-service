@@ -184,7 +184,12 @@ router.get('/articles', (req, res, next) => {
 });
 
 const handleVanityArticle = (req, res, next) => {
-	const urlToSearch = `*://ftalphaville.ft.com/${sanitizeParam(req.params[0])}/`;
+	const matchVanity = sanitizeParam(req.params[0]).match(/[0-9]{4}\/[0-9]{2}\/[0-9]{2}\/([0-9]+)\/(.*)/);
+	if (!matchVanity || !matchVanity.length) {
+		return next();
+	}
+
+	const urlToSearch = `*://ftalphaville.ft.com/*/*/*/${matchVanity[1]}/${matchVanity[2]}/`;
 	return es.getArticleByUrl(urlToSearch)
 		.then(article => {
 			if (!article) {
