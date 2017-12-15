@@ -72,7 +72,7 @@ function populateContent (wpPath, article, isMock, withContent) {
 					})])
 				.then((response) => {
 					const content = response[0];
-					const comments = response[1];
+					const comments = response[1] || [];
 
 					return [init, content, comments];
 				});

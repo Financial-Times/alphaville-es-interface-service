@@ -15,7 +15,13 @@ exports.getAllComments = function (config) {
 	}
 
 	return fetch(url).then((response) => {
-		return response.json();
+		if (response.ok) {
+			return response.json();
+		} else {
+			console.error('Unable to fetch comments or comments not available.');
+
+			return {};
+		}
 	}).then((data) => {
 		if (data && data.collection && data.collection.collectionId) {
 			let comments = [];
