@@ -1,6 +1,6 @@
 "use strict";
 
-const WpApi = require('alphaville-marketslive-wordpress-api');
+const MLApi = require('alphaville-marketslive-api-client');
 
 const striptags = require('striptags');
 const _ = require('lodash');
@@ -23,7 +23,7 @@ const maxSummaryLength = 120;
 let mockContent;
 
 if (process.env.ML_TRANSCRIPT_MOCK_URL) {
-	const mockWpApi = new WpApi(process.env.ML_TRANSCRIPT_MOCK_URL);
+	const mockMLApi = new MLApi(process.env.ML_API_URL, process.env.ML_TRANSCRIPT_MOCK_URL);
 	let path = process.env.ML_TRANSCRIPT_MOCK_URL;
 	while (path[0] === '/') {
 		path = path.substr(1, path.length);
@@ -32,12 +32,12 @@ if (process.env.ML_TRANSCRIPT_MOCK_URL) {
 		path = `marketslive/${path}`;
 	}
 
-	mockWpApi.init().then((init) => {
+	mockMLApi.init().then((init) => {
 		let dataPromise;
 		if (init.data.status === 'closed') {
-			dataPromise = mockWpApi.transcriptJson();
+			dataPromise = mockMLApi.transcriptJson();
 		} else {
-			dataPromise = mockWpApi.catchupJson();
+			dataPromise = mockMLApi.catchupJson();
 		}
 
 		Promise.all([dataPromise, commentsApi.getAllComments({
@@ -53,18 +53,18 @@ if (process.env.ML_TRANSCRIPT_MOCK_URL) {
 			mockContent = [init, content, comments];
 		});
 	}).catch(e => {
-		console.log('[Error mockWpApi]: ', e.message);
+		console.log('[Error mockMLApi]: ', e.message);
 	});
 }
 
 
-function populateContent (wpPath, article, isMock, withContent) {
-	const wpApi = new WpApi(wpPath);
+function populateContent (mlApiPath, article, isMock, withContent) {
+	const mlApi = new MLApi(process.env.ML_API_URL, mlApiPath);
 
 	const fetchNormalContent = function () {
-		return wpApi.init().then((init) => {
+		return mlApi.init().then((init) => {
 			if (init.data.status === 'closed' && withContent) {
-				return Promise.all([wpApi.transcriptJson(), commentsApi.getAllComments({
+				return Promise.all([mlApi.transcriptJson(), commentsApi.getAllComments({
 						title: article.title,
 						articleId: article.id,
 						url: process.env.APP_URL + article.av2WebUrl,
@@ -103,8 +103,15 @@ function populateContent (wpPath, article, isMock, withContent) {
 
 		if (initResponse.data.status === 'inprogress') {
 			article.isLive = true;
+			article.isComingSoon = false;
 		} else {
 			article.isLive = false;
+
+			if (initResponse.data.status === 'comingsoon') {
+				article.isComingSoon = true;
+			} else {
+				article.isComingSoon = false;
+			}
 		}
 
 		article.comments.enabled = initResponse.data.allow_comment;
@@ -235,8 +242,6 @@ function populateContent (wpPath, article, isMock, withContent) {
 exports.processArticle = function (article, withContent) {
 	return new Promise((resolve) => {
 		if (article && article.webUrl && article.webUrl.indexOf('marketslive') !== -1) {
-
-
 			article.isMarketsLive = true;
 
 			populateContent(article.av2WebUrl, article, false, withContent).then(article => {

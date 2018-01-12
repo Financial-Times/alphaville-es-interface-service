@@ -1,4 +1,4 @@
-const WpApi = require('alphaville-marketslive-wordpress-api');
+const MLApi = require('alphaville-marketslive-api-client');
 const _ = require('lodash');
 
 const fakeEsResponse = {
@@ -101,24 +101,24 @@ const fakeEsResponse = {
 
 
 module.exports = function(urlSearch) {
-	const wpPath = urlSearch.replace(/.*ftalphaville.ft.com/, '');
+	const mlApiPath = urlSearch.replace(/.*ftalphaville.ft.com/, '');
 
-	const wpApi = new WpApi(wpPath);
+	const mlApi = new MLApi(process.env.ML_API_URL, mlApiPath);
 
-	return wpApi.init().then((init) => {
+	return mlApi.init().then((init) => {
 		if (init) {
 			const response = _.merge(JSON.parse(JSON.stringify(fakeEsResponse)), {
 				id: init.data.post_uuid,
 				title: init.data.post_title,
 				publishedDate: new Date(init.data.time * 1000).toISOString(),
 				initialPublishedDate: new Date(init.data.time * 1000).toISOString(),
-				webUrl: 'http://ftalphaville.ft.com' + wpPath,
+				webUrl: 'http://ftalphaville.ft.com' + mlApiPath,
 				realtime: init.data.status === 'closed' ? false : true,
 				comments: {
 					enabled: init.data.allow_comment
 				},
 				_lastUpdatedDateTime: new Date(init.data.time).toISOString(),
-				url: 'http://ftalphaville.ft.com' + wpPath
+				url: 'http://ftalphaville.ft.com' + mlApiPath
 			});
 
 			return response;

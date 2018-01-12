@@ -1,6 +1,3 @@
-const WpApi = require('alphaville-marketslive-wordpress-api');
-WpApi.setBaseUrl(process.env.WP_URL);
-
 const moment = require('moment-timezone');
 const nEsClient = require('@financial-times/n-es-client');
 const images = require('./lib/images');
