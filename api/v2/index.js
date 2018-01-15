@@ -161,7 +161,7 @@ router.get('/articles', (req, res, next) => {
 				multi_match: {
 					query: sanitizedSearchString,
 					type: 'most_fields',
-					fields: ['frontmatter']
+					fields: ['frontmatter', 'bodyText']
 				}
 			}
 		};
