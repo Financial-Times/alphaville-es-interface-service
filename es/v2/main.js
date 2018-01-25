@@ -14,10 +14,10 @@ const marketsLiveWpFallback = require('./lib/marketsLiveWpFallback');
 const avSeries = require('./lib/series');
 const categorization = require('./lib/categorization');
 
-function processArticles(response) {
+function processArticles(articles) {
 	const transformPromises = [];
 
-	response.forEach((article) => {
+	articles.forEach((article) => {
 		transformPromises.push(Promise.all([
 			categorization.processArticle(article),
 			avSeries.processArticle(article, {resultSize:20}),
@@ -33,7 +33,14 @@ function processArticles(response) {
 	});
 
 	return Promise.all(transformPromises).then(() => {
-		return response;
+		const result = [];
+
+		articles.forEach(article => {
+			if (!article.isDeleted) {
+				result.push(article);
+			}
+		});
+		return result;
 	});
 }
 

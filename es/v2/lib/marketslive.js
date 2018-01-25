@@ -101,6 +101,10 @@ function populateContent (mlApiPath, article, isMock, withContent) {
 		const jsonResponse = response[1];
 		const livefyreComments = response[2];
 
+		if (initResponse.data.status === 'deleted') {
+			article.isDeleted = true;
+		}
+
 		if (initResponse.data.status === 'inprogress') {
 			article.isLive = true;
 			article.isComingSoon = false;
@@ -116,6 +120,7 @@ function populateContent (mlApiPath, article, isMock, withContent) {
 
 		article.comments.enabled = initResponse.data.allow_comment;
 
+		article.sessionPath = article.av2WebUrl.replace('marketslive', '').replace(/\//g, '');
 
 		article.subheading = initResponse.data.post_excerpt;
 		article.openingHTML = `<p>${initResponse.data.post_excerpt}</p>`;
