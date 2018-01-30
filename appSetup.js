@@ -1,7 +1,7 @@
 const morgan = require('morgan');
 const path = require('path');
 const devErrorHandler = require('errorhandler');
-const ftwebservice = require('express-ftwebservice');
+const expressWebService = require('@financial-times/express-web-service');
 const healthcheck = require('./health/healthchecks');
 
 // catch 404 and forward to error handler
@@ -24,7 +24,7 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = (app, config) => {
-	ftwebservice(app, {
+	expressWebService(app, {
 		manifestPath: path.join(__dirname, 'package.json'),
 		about: {
 			"schemaVersion": 1,
