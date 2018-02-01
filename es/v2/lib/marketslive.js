@@ -252,6 +252,7 @@ exports.processArticle = function (article, withContent) {
 			populateContent(article.av2WebUrl, article, false, withContent).then(article => {
 				resolve(article);
 			}).catch((err) => {
+				console.log(`Normal content fetch failed for ${article.av2WebUrl}, try mock URL.`);
 				if (process.env.ML_TRANSCRIPT_MOCK_URL) {
 					return populateContent(process.env.ML_TRANSCRIPT_MOCK_URL, article, true, withContent).then(article => {
 						resolve(article);
