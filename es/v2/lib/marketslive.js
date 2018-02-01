@@ -63,10 +63,7 @@ function populateContent (mlApiPath, article, isMock, withContent) {
 
 	const fetchNormalContent = function () {
 		return mlApi.init().then((init) => {
-			console.log('withContent', withContent);
 			if (init.data.status === 'closed' && withContent) {
-				console.log('init', init);
-
 				return Promise.all([mlApi.transcriptJson(), commentsApi.getAllComments({
 						title: article.title,
 						articleId: article.id,
@@ -76,8 +73,6 @@ function populateContent (mlApiPath, article, isMock, withContent) {
 				.then((response) => {
 					const content = response[0];
 					const comments = response[1] || [];
-
-					console.log('content', content);
 
 					return [init, content, comments];
 				});
@@ -255,8 +250,6 @@ exports.processArticle = function (article, withContent) {
 			article.isMarketsLive = true;
 
 			populateContent(article.av2WebUrl, article, false, withContent).then(article => {
-				console.log(`Content found for ${article.av2WebUrl}`, article);
-
 				resolve(article);
 			}).catch((err) => {
 				if (process.env.ML_TRANSCRIPT_MOCK_URL) {
