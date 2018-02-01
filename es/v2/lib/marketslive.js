@@ -250,6 +250,8 @@ exports.processArticle = function (article, withContent) {
 			article.isMarketsLive = true;
 
 			populateContent(article.av2WebUrl, article, false, withContent).then(article => {
+				console.log(`Content found for ${article.av2WebUrl}`, article);
+
 				resolve(article);
 			}).catch((err) => {
 				if (process.env.ML_TRANSCRIPT_MOCK_URL) {
