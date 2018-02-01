@@ -63,7 +63,10 @@ function populateContent (mlApiPath, article, isMock, withContent) {
 
 	const fetchNormalContent = function () {
 		return mlApi.init().then((init) => {
+			console.log('withContent', withContent);
 			if (init.data.status === 'closed' && withContent) {
+				console.log('init', init);
+
 				return Promise.all([mlApi.transcriptJson(), commentsApi.getAllComments({
 						title: article.title,
 						articleId: article.id,
@@ -73,6 +76,8 @@ function populateContent (mlApiPath, article, isMock, withContent) {
 				.then((response) => {
 					const content = response[0];
 					const comments = response[1] || [];
+
+					console.log('content', content);
 
 					return [init, content, comments];
 				});
