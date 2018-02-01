@@ -85,7 +85,7 @@ const mlStreamCache = 60;
 const hotStreamCache = 600;
 
 const setCache = (res, value) => {
-	if (process.env.NODE_ENV === 'production') {
+	if (process.env.CACHE_ENABLED === 'true') {
 		if (value > 0) {
 			res.set('Surrogate-Control', 'max-age=' + value);
 		} else {
