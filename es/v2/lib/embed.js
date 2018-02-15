@@ -31,7 +31,7 @@ function embedFtVideo (article) {
 		try {
 			$ = cheerio.load(article.bodyHTML);
 
-			$('.n-content-video--brightcove').each(function () {
+			$('.n-content-video--brightcove, .n-content-video--internal').each(function () {
 				const el = $(this);
 				const href = el.find('a').attr('href');
 				const vIdMatch = href.match(/video\.ft\.com\/([0-9]+)/);
