@@ -24,7 +24,7 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = (app, config) => {
-	expressWebService(app, {
+	app.use(expressWebService({
 		manifestPath: path.join(__dirname, 'package.json'),
 		about: {
 			"schemaVersion": 1,
@@ -58,7 +58,7 @@ module.exports = (app, config) => {
 				];
 			});
 		}
-	});
+	}));
 
 	if (config.env === config.dev) {
 		app.use(notFoundHandler);
