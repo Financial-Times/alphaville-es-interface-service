@@ -35,7 +35,12 @@ exports.processArticle = function (article) {
 					primaryTheme.push(setPrimaryTheme(seriesLabel, '/series/' + seriesLabel));
 				}
 			} else {
-				const topics = filterAnnotations(article.annotations, {type: 'TOPIC'});
+				const topics = filterAnnotations(article.annotations,
+					(a => a.type === 'TOPIC' &&
+						(a.predicate.split('/').pop() === 'about' ||
+						a.predicate.split('/').pop() === 'isClassifiedBy' ||
+						a.predicate.split('/').pop() === 'isPrimarilyClassifiedBy')
+					));
 				const authors = article.authors;
 
 				if (topics.length > 0) {
