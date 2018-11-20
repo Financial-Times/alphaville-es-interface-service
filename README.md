@@ -22,3 +22,9 @@ Run the following:
 ```
 heroku local
 ```
+
+### Using alpavhille services together
+
+If you'd like to use other alphaville services locally with the ES service app (alphaville-marketslive-service), then you'll need to change their relevant environment variable (key, URL):
+
+- `ML_API_URL` for *alphaville-marketslive-service*
