@@ -19,7 +19,6 @@
     "alphaville-team-members": "github:financial-times/alphaville-team-members#0.3.3",
     "bluebird": "^3.4.6",
     "cheerio": "^0.20.0",
-    "keen-query": "^3.0.0",
     "promise.prototype.finally": "^1.0.1",
     "body-parser": "^1.15.2",
     "cors": "^2.8.1",
