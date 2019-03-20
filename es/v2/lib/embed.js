@@ -66,7 +66,7 @@ function embedFtVideo (article) {
 			$('.n-content-video--internal').each(function () {
 				const el = $(this);
 				const href = el.find('a').attr('href');
-				const vIdMatch = href.match(/ft\.com\/video\/([a-zA-Z0-9-]+)/);
+				const vIdMatch = href.match(/ft\.com\/(video|content)\/([a-zA-Z0-9-]+)/);
 				let videoId;
 				if (vIdMatch && vIdMatch.length) {
 					videoId = vIdMatch[1];
