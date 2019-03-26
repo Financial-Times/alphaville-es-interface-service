@@ -34,11 +34,8 @@ function embedFtVideo (article) {
 			$('.n-content-video--internal').each(function () {
 				const el = $(this);
 				const href = el.find('a').attr('href');
-				const vIdMatch = href.match(/ft\.com\/video\/([a-zA-Z0-9-]+)/);
-				let videoId;
-				if (vIdMatch && vIdMatch.length) {
-					videoId = vIdMatch[1];
-				}
+				const vIdMatch = href.match(/\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/);
+				const videoId = Array.isArray(vIdMatch) ? vIdMatch.pop() : null;
 
 				if (videoId) {
 					el.replaceWith($(`<div class="o-video o-video--large" data-o-component="o-video" data-o-video-id="${videoId}" data-o-video-advertising="true" data-o-video-placeholder="true"></div>`));
