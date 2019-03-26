@@ -25,38 +25,6 @@ function embedPodcast (article) {
 		});
 }
 
-function embedBrightcoveVideo (article) {
-	return new Promise((resolve) => {
-		let $;
-		try {
-			$ = cheerio.load(article.bodyHTML);
-
-			$('.n-content-video--brightcove').each(function () {
-				const el = $(this);
-				const href = el.find('a').attr('href');
-				const vIdMatch = href.match(/video\.ft\.com\/([0-9]+)/);
-				let videoId;
-				if (vIdMatch && vIdMatch.length) {
-					videoId = vIdMatch[1];
-				}
-
-				if (videoId) {
-					el.replaceWith($(`<div class="o-video o-video--large" data-o-component="o-video" data-o-video-id="${videoId}" data-o-video-advertising="true" data-o-video-placeholder="true"></div>`));
-				}
-			});
-
-			article.bodyHTML = $.html();
-			resolve(article);
-		} catch (e) {
-			console.log("ERROR", e);
-			console.log(article.id);
-
-			resolve(article);
-			return;
-		}
-	});
-}
-
 function embedFtVideo (article) {
 	return new Promise((resolve) => {
 		let $;
@@ -89,7 +57,6 @@ function embedFtVideo (article) {
 	});
 }
 
-
 exports.processArticle = function (article) {
 	return new Promise((resolve) => {
 		if (article) {
@@ -97,10 +64,6 @@ exports.processArticle = function (article) {
 			if (article.bodyHTML) {
 				if (avSeries.getSeries(article, 'Alphachat') || avSeries.getSeries(article, 'Alphachatterbox') || categorization.isPodcast(article)) {
 					embeds.push(embedPodcast(article));
-				}
-
-				if (article.bodyHTML.indexOf('n-content-video--brightcove') !== -1) {
-					embeds.push(embedBrightcoveVideo(article));
 				}
 
 				if (article.bodyHTML.indexOf('n-content-video--internal') !== -1) {
