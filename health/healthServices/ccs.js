@@ -19,7 +19,7 @@ exports.getHealth = function () {
 	return new Promise((resolve) => {
 		const currentHealth = _.clone(healthCheckModel);
 
-		fetch(`https://${process.env['CCS_URL']}/v1/getComments?title=Markets%20Live:%20Tuesday,%201st%20November,%202016&url=https://ftalphaville2.ft.com/marketslive/2016-11-01/&articleId=bf488b61-e0fd-3fb6-abff-f175ad0beab3`)
+		fetch(`https://${process.env['CCS_URL']}/v1/getComments?title=Markets%20Live:%Thursday,%205th%20September,%202019&url=https://ftalphaville2.ft.com/marketslive/2019-09-05/&articleId=2a7e3536-c880-37d5-81fa-bfaaf9d424e3`)
 			.then(res => {
 				if (res.ok) {
 					return res.json();
