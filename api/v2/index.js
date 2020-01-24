@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const router = new (require('express')).Router();
 const es = require('../../es/v2/main');
-const suds = require('../../services/suds');
 const fastly = require('../../services/fastly');
 const vanityRegex = /^\/article\/+([0-9]+\/[0-9]+\/[0-9]+\/[0-9]+\/?.*)$/;
 const uuidRegex = /^\/article\/+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/;
@@ -304,60 +303,6 @@ router.get('/marketslive', (req, res, next) => {
 
 router.get(mlVanityRegex, handleVanityArticle);
 router.get(mlUuidRegex, handleUuidArticle);
-
-router.get('/hotarticles', (req, res, next) => {
-	let limit = 30;
-	if (req.query.limit) {
-		limit = parseInt(req.query.limit, 10);
-
-		if (limit > 90) {
-			limit = 90;
-		}
-	}
-
-	return suds.getHotArticles({
-		tag: [
-			'brand.FT_Alphaville',
-			'brand.First_FT'
-		],
-		op: 'or',
-		number: limit + 10
-	}).then(results => {
-		setCache(res, hotStreamCache);
-
-		const articles = results
-			.filter(a => a.url.indexOf('marketslive') === -1);
-
-		const articleIds = articles.map(a => a.articleId);
-
-		return es.searchArticles({
-			query: {
-				ids: {
-					values: articleIds
-				}
-			},
-			size: limit
-		}).then(response => {
-			if (response) {
-				const sortedResult = [];
-				response.items.forEach((article) => {
-					if (articleIds.indexOf(article.id) >= 0) {
-						sortedResult[articleIds.indexOf(article.id)] = article;
-					}
-				});
-
-				response.items = sortedResult.filter(a => a !== null);
-
-				res.json(response);
-			} else {
-				res.json({
-					items: [],
-					total: 0
-				});
-			}
-		});
-	}).catch(next);
-});
 
 router.get('/type', (req, res, next) => {
 	const type = req.query.type;
