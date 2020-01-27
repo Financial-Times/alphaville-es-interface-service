@@ -15,10 +15,7 @@ exports.processArticle = function (article) {
 		const primaryTheme = [];
 
 		if (article) {
-			if (categorization.isMarketsLive(article)) {
-				primaryTheme.push(setPrimaryTheme('Markets Live', '/marketslive'));
-
-			} else if (categorization.isFirstFT(article)){
+			if (categorization.isFirstFT(article)){
 				primaryTheme.push(setPrimaryTheme('First FT', 'https://www.ft.com/firstft'));
 
 			} else if (categorization.isOpeningQuote(article)){

@@ -4,17 +4,6 @@ function getTitle(article) {
 	return !article ? '' : (('originalTitle' in article) ? article.originalTitle : article.title);
 }
 
-exports.isMarketsLive = function (article) {
-	if (article) {
-		if ('isMarketsLive' in article && article.isMarketsLive === true) {
-			return true;
-		} else if (article && article.webUrl && article.webUrl.indexOf('marketslive') !== -1) {
-			return true;
-		}
-	}
-	return false;
-};
-
 exports.isGuestPost = function (article) {
 	let isGuestPost = false;
 	const title = getTitle(article);
@@ -40,8 +29,6 @@ exports.isFirstFT = function (article) {
 	}
 	return isFirstFT;
 };
-
-
 
 exports.isPodcast = function(article){
 	let isPodcast = false;
@@ -93,5 +80,3 @@ exports.isSeriesArticle = function (article) {
 	}
 	return isSeriesArticle;
 };
-
-

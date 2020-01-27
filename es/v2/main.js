@@ -1,18 +1,13 @@
-const WpApi = require('alphaville-marketslive-wordpress-api');
-WpApi.setBaseUrl(process.env.WP_URL);
-
 const moment = require('moment-timezone');
 const nEsClient = require('@financial-times/n-es-client');
 const images = require('./lib/images');
 const summaries = require('./lib/summaries');
 const authors = require('./lib/authors');
-const marketslive = require('./lib/marketslive');
 const primaryTheme = require('./lib/primaryTheme');
 const bodyHTML = require('./lib/bodyHTML');
 const embed = require('./lib/embed');
 const webUrl = require('./lib/webUrl');
 const title = require('./lib/title');
-const marketsLiveWpFallback = require('./lib/marketsLiveWpFallback');
 
 const avSeries = require('./lib/series');
 const categorization = require('./lib/categorization');
@@ -27,7 +22,6 @@ function processArticles(response) {
 			webUrl.processArticle(article),
 			bodyHTML.processArticle(article)
 				.then(images.processArticle)
-				.then(marketslive.processArticle)
 				.then(summaries.processArticle),
 			authors.processArticle(article),
 			primaryTheme.processArticle(article),
@@ -87,17 +81,6 @@ function getAlphavilleEsQuery (query) {
 	return query;
 }
 
-const fixMlWebUrls = (articles) => {
-	return articles.map(article => {
-		if (article.realtime === true && article.webUrl.indexOf('marketslive') === -1) {
-			let mlDate = moment(article.firstPublishedDate).format('YYYY-MM-DD');
-			article.webUrl = `http://ftalphaville.ft.com/marketslive/${mlDate}/`
-		}
-		return article;
-	});
-};
-
-
 module.exports = {
 	searchArticles: function(query) {
 		let total = 0;
@@ -106,7 +89,6 @@ module.exports = {
 				total = articles.total;
 				return articles;
 			})
-			.then(fixMlWebUrls)
 			.then(processArticles)
 			.then(articleList => {
 				return {
@@ -127,7 +109,6 @@ module.exports = {
 						bodyHTML.processArticle(article)
 							.then(images.processArticle)
 							.then(embed.processArticle)
-							.then(article => marketslive.processArticle(article, true))
 							.then(summaries.processArticle),
 						authors.processArticle(article),
 						primaryTheme.processArticle(article),
@@ -151,10 +132,6 @@ module.exports = {
 			)
 			.then(res => {
 				if (!res.length) {
-					if (url.includes('marketslive')) {
-						return marketsLiveWpFallback(url);
-					}
-
 					return null;
 				}
 
@@ -169,7 +146,6 @@ module.exports = {
 						bodyHTML.processArticle(article)
 							.then(images.processArticle)
 							.then(embed.processArticle)
-							.then(article => marketslive.processArticle(article, true))
 							.then(summaries.processArticle),
 						authors.processArticle(article),
 						primaryTheme.processArticle(article),

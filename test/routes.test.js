@@ -94,42 +94,4 @@ describe('api routes', () => {
 				});
 		});
 	});
-	describe('GET /v1/marketslive', () => {
-		before(() => {
-			let mlArticleId = null;
-		});
-		it('should return one article when limit is set to 1', (done) => {
-			request(app)
-				.get(`/v1/marketslive?limit=1`)
-				.set('X-API-KEY', process.env['API_KEY'])
-				.expect(200)
-				.end((err, res) => {
-					expect(res.body).toBeAn(Array);
-					expect(res.body.length).toBe(1);
-					done();
-				});
-		});
-		it('should return one article by vanity', (done) => {
-			request(app)
-				.get(`/v1/marketslive${process.env['TEST_ML_ARTICLE_VANITY']}`)
-				.set('X-API-KEY', process.env['API_KEY'])
-				.expect(200)
-				.end((err, res) => {
-					mlArticleId = res.body.id;
-					expect(res.body).toBeAn(Object);
-					done();
-				});
-		});
-		it('should return the same article by uuid', (done) => {
-			request(app)
-				.get(`/v1/article/${mlArticleId}`)
-				.set('X-API-KEY', process.env['API_KEY'])
-				.expect(200)
-				.end((err, res) => {
-					expect(res.body).toBeAn(Object);
-					expect(res.body.id).toEqual(mlArticleId);
-					done();
-				});
-		});
-	});
 });

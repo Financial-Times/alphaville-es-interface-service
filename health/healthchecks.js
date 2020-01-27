@@ -2,7 +2,6 @@
 
 
 const healthServices = [
-	require('./healthServices/wpMarketsliveApi'),
 	require('./healthServices/wpJsonApi'),
 	require('./healthServices/ccs'),
 	require('./healthServices/nextElastic')
