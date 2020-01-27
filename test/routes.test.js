@@ -132,17 +132,4 @@ describe('api routes', () => {
 				});
 		});
 	});
-	describe('GET /v1/hotarticles', () => {
-		it('should return the hottest article when limit is set to 1', (done) => {
-			request(app)
-				.get(`/v1/hotarticles?limit=1`)
-				.set('X-API-KEY', process.env['API_KEY'])
-				.expect(200)
-				.end((err, res) => {
-					expect(res.body).toBeAn(Array);
-					expect(res.body.length).toBe(1);
-					done();
-				});
-		});
-	});
 });
