@@ -51,6 +51,9 @@ jobs:
       - run:
           name: Install dependencies
           command: npm install
+      - store_artifacts:
+          path: build-state
+          destination: build-state
       - persist_to_workspace:
           root: *workspace_root
           paths:
