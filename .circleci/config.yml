@@ -8,7 +8,7 @@ references:
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
-version: 2
+version: 1
 jobs:
   build:
     <<: *container_config_node12
@@ -29,7 +29,8 @@ jobs:
           name: Run tests
           command: npm test
 workflows:
-    build-and-test:
-      jobs:
-        - build
-        - test
+  version: 1
+  build-and-test:
+    jobs:
+      - build
+      - test
