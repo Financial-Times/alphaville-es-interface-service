@@ -1,8 +1,8 @@
 references:
-  container_config_node12: &container_config_node12
+  container_config_node14: &container_config_node14
       working_directory: ~/project/build
       docker:
-        - image: circleci/node:12-browsers
+        - image: circleci/node:14-browsers
   workspace_root: &workspace_root
     ~/project
   attach_workspace: &attach_workspace
@@ -45,7 +45,7 @@ references:
 version: 2
 jobs:
   build:
-    <<: *container_config_node12
+    <<: *container_config_node14
     steps:
       - checkout
       - run:
@@ -59,7 +59,7 @@ jobs:
           paths:
             - build
   test:
-    <<: *container_config_node12
+    <<: *container_config_node14
     steps:
       - *attach_workspace
       - run: 

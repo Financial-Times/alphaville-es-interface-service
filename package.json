@@ -9,7 +9,7 @@
     "test": "NODE_ENV=testing mocha ./test/routes.test.js"
   },
   "engines": {
-    "node": "^6"
+    "node": "14.x"
   },
   "author": "Dragos Digulescu <dragos.digulescu@ft.com> (https://github.com/ddigulescu)",
   "license": "ISC",
