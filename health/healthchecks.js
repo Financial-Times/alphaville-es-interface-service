@@ -2,7 +2,6 @@
 
 
 const healthServices = [
-	require('./healthServices/wpJsonApi'),
 	require('./healthServices/nextElastic')
 ];
 
