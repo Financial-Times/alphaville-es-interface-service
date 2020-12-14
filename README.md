@@ -1,3 +1,6 @@
+# NO LONGER IN USE.
+**All Alphaville articles are now rendered as article content on FT.com**
+
 # alphaville-es-interface-service
 Microservice for alphaville-es-interface
 
