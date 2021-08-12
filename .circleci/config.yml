@@ -24,13 +24,13 @@ references:
     restore_cache:
         <<: *npm_cache_keys
 
-  filters_only_master: &filters_only_master
+  filters_only_main: &filters_only_main
     branches:
-      only: master
+      only: main
 
-  filters_ignore_master: &filters_ignore_master
+  filters_ignore_main: &filters_ignore_main
     branches:
-      ignore: master
+      ignore: main
 
   filters_ignore_tags: &filters_ignore_tags
     tags:
